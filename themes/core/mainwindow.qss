@@ -1,0 +1,12 @@
+QMainWindow {
+    background-color: $level00;
+
+    color: $fontColor;
+    font-family: $fontFamily;
+    font-size: $fontSize;
+}
+
+QMainWindow:separator{
+    height: 10px;
+    background-color: $level03;
+}

@@ -1,0 +1,11 @@
+QTableView QTableCornerButton:section{
+ background: $level01;
+
+ border: 2px;
+ border-radius: 6px;
+ border-color: $level02;
+
+ color: $fontColor;
+ font-family: $fontFamily;
+ font-size: $fontTabSize;
+}

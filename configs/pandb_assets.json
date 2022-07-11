@@ -1,0 +1,51 @@
+{
+  "projectName": "pandb",
+  "projectPath": "E:/3D_Projects/projects/pandb",
+  "configRoot": "assets",
+  "ROOTS": {
+    "Character": null,
+    "Prop": null
+  },
+  "BASEFOLDERS": {
+    "Art": "ASSETFOLDERS",
+    "Model": "ASSETFOLDERS",
+    "Rig": "ASSETFOLDERS",
+    "Surface": "ASSETFOLDERS"
+  },
+  "ASSETFOLDERS": {
+    "publish": "PUBLISHFOLDERS",
+    "reference": "REFFOLDERS",
+    "review": null,
+    "work": "WORKFOLDERS"
+  },
+  "PUBLISHFOLDERS": {
+    "alembic": null,
+    "maya": null,
+    "mayaGoZ": null,
+    "review": null,
+    "substance": null,
+    "zbrushGoZ": null,
+    "ZBrushZTL": null
+  },
+  "REFFOLDERS": {
+    "artwork": null,
+    "footage": null
+  },
+  "WORKFOLDERS": {
+    "images": null,
+    "maya": "MAYAFOLDERS",
+    "substance": null,
+    "zbrush": "ZBRUSHFOLDERS"
+  },
+  "MAYAFOLDERS": {
+      "sourceimages": null,
+      "cache": null,
+      "data": null,
+      "images": null,
+      "substance": null
+    },
+  "ZBRUSHFOLDERS":{
+      "fbx": null,
+      "obj": null
+    }
+}

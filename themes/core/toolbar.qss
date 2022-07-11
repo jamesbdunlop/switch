@@ -1,0 +1,22 @@
+QToolBar{
+    background: $level00;
+
+    border: 1px;
+    border-radius: 16px;
+    border-color: $level00;
+
+    color: $fontColor;
+    font-family: $fontFamily;
+    font-size: $fontSize;
+}
+
+QToolBar:hover {
+    border: 1px;
+    border-radius: 16px;
+    border-color: $level00;
+}
+
+QToolBar:separator {
+    background: $level03;
+    height: 2px;
+}

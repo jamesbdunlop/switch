@@ -1,0 +1,38 @@
+{
+  "projectName": "pandb",
+  "projectPath": "E:/3D_Projects/projects/pandb",
+  "configRoot": "sequences",
+  "ROOTS": {
+    "Seq001": null
+  },
+  "BASEFOLDERS": {
+    "devAnim": "DEVFOLDERS",
+    "anim": "ANIMPUBLISHFOLDERS",
+    "devLighting": "DEVFOLDERS",
+    "output": null
+  },
+  "DEVFOLDERS": {
+    "reference": "REFFOLDERS",
+    "blasts": null,
+    "maya": "MAYAFOLDERS"
+  },
+  "ANIMPUBLISHFOLDERS": {
+    "maya": null,
+    "cache": null
+  },
+  "REFFOLDERS": {
+    "artwork": null,
+    "footage": null
+  },
+  "MAYAFOLDERS": {
+      "sourceimages": null,
+      "cache": null,
+      "data": null,
+      "images": null,
+      "substance": null
+    },
+  "ZBRUSHFOLDERS":{
+      "fbx": null,
+      "obj": null
+    }
+}
