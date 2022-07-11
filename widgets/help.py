@@ -28,10 +28,14 @@ class HelpView(BaseWidget):
                   "<br>                                                                        |zbrush|ZBRUSHFOLDERS</pre>" \
                   "<br>The main view will create a toolbar on the left for quick navigation to the specified rootFolders." \
                   "<br>The centralView is the main folder browser of the folder that exists on disk. You will be prompted to create a new project" \
-                  "<br> if the base folder doesn't exist." \
+                  "<br>if the base folder doesn't exist." \
+                  "<br>" \
+                  "<br>You can perform various rightClick options here, this will try to open various file formats using your system settings." \
+                  "<br>Using <b>Set As Root</b> will change the selected path as the root of the browser." \
+                  "<br>Using <b> Explore to folder</b> will open a file explorer to that folder path." \
                   "<br>" \
                   "<br>This tool can be run standAlone via the exe, but can also be nested inside maya as a DockWidget using the sourceCode." \
-                  "<h2>Schema Overview:</h2>" \
+                  "<h2>Schema.json Overview:</h2>" \
                   "<br>This is stored in a .json format in the configs folder. <br><b>Required data:</b>" \
                   "<table>" \
                   "<tr><td><b>\"projectName\"</b>:</td><td>&nbsp;&nbsp;This is the name of the project.</td></tr>" \
@@ -44,7 +48,7 @@ class HelpView(BaseWidget):
                   "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This way you can create fairly complex folder structures with minimal effort." \
                   "<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The create/update project schema UI can help you do this fairly quickly. " \
                   "</table>" \
-                  "<h2>Create/Update Schema Overview:</h2>" \
+                  "<h2>Create/Update Schema UI Overview:</h2>" \
                   "You can use this UI to setup a new project / folder schema to use. " \
                   "<br>" \
                   "<table>" \
