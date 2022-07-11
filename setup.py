@@ -7,30 +7,28 @@ iconPackFiles = list()
 dir = r"D:\CODE\Python\jamesd\switch\themes\iconpacks\core"
 for file in os.listdir(dir):
     fp = "{}/{}".format(dir, file)
-    if not os.path.isfile(fp):
-        continue
-    iconPackFiles.append(fp)
+    if fp.endswith(".png"):
+        iconPackFiles.append(fp)
 
 # Theme files
 coreThemeFiles = list()
 dir = r"D:\CODE\Python\jamesd\switch\themes\core"
 for file in os.listdir(dir):
     fp = "{}/{}".format(dir, file)
-    if not os.path.isfile(fp):
-        continue
-    coreThemeFiles.append(fp)
+    if fp.endswith(".qss") or fp.endswith(".json"):
+        coreThemeFiles.append(fp)
 
 # Configs
 configFiles = list()
 dir = r"D:\CODE\Python\jamesd\switch\configs"
 for file in os.listdir(dir):
     fp = "{}/{}".format(dir, file)
-    if not os.path.isfile(fp):
-        continue
-    configFiles.append(fp)
+    if fp.endswith(".json"):
+        configFiles.append(fp)
 
 dataFiles = [
 ('', [r'D:\CODE\Python\jamesd\switch\switch.ico']),
+('', [r'D:\CODE\Python\jamesd\switch\readme.md']),
 ('imageformats', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\imageformats\qico.dll']),
 ('platforms', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll']),
 ('themes\core_blue', [r'D:\CODE\Python\jamesd\switch\themes\core_blue\theme.json']),
