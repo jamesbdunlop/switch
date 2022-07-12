@@ -25,6 +25,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self.setSortingEnabled(True)
         self._proxyModel = QtCore.QSortFilterProxyModel()
         self._proxyModel.setSourceModel(self._model)
+
         self.setModel(self._proxyModel)
         self.updateModelPath()
 
@@ -45,6 +46,22 @@ class SystemFileBrowser(BaseTreeViewWidget):
         logger.debug("rootPath: %s", rootPath)
         self._dir.setPath(rootPath)
         self._dir.makeAbsolute()
+        if not self.createRootFolderPath(self._dir):
+            return
+
+        self.model().setRootPath(self._dir.path())
+        idx = self.model().index(self._dir.path())
+        self.setRootIndex(self._proxyModel.mapFromSource(idx))
+
+    def createRootFolderPath(self, rootPath):
+        """Checks if the folder exists on disk. Prompts to create if it doesn't returns bool if it exists for use or not.
+
+        Args:
+            rootPath (QDir):
+
+        Returns:
+            bool
+        """
         if not os.path.exists(self._dir.path()):
             logger.warning("Root path does not exist!")
             confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Create?!",
@@ -56,10 +73,11 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 self._dir.mkpath(rootPath)
                 for root in self.config.roots():
                     self._dir.mkpath(os.path.sep.join([rootPath, root]))
+                return True
 
-        self.model().setRootPath(self._dir.path())
-        idx = self.model().index(self._dir.path())
-        self.setRootIndex(self._proxyModel.mapFromSource(idx))
+            return False
+
+        return True
 
     def _rcMenu(self, point):
         self.menu = QtWidgets.QMenu()
@@ -164,7 +182,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 srcIdx = self._proxyModel.mapToSource(rowIndices[0])
                 path = self.model().filePath(srcIdx)
 
-        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR")
+        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga")
         if os.path.isfile(path):
             _, ext = os.path.splitext(path)
             if ext in valid:
@@ -185,18 +203,16 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self.setprojectPath(dirPath.split("/"))
 
     def _collapseHrc(self, qmodelIndex):
-        """Recursive method to collapse all children on shift+click
+        """Method to collapse all children on shift+click
 
         Args:
             qmodelIndex (QtCore.QModelIndex):
         """
-        if self.model().hasChildren(qmodelIndex):
-            rowCount = self.model().rowCount(qmodelIndex)
+        if self._proxyModel.hasChildren(qmodelIndex):
+            rowCount = self._proxyModel.rowCount(qmodelIndex)
             for idx in range(rowCount):
                 child = qmodelIndex.child(idx, 0)
                 self.collapse(child)
-                if self.model().hasChildren(child):
-                    self._collapseHrc(child)
 
     def _deleteSelected(self):
         confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!", "Are you sure?", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None, QtCore.Qt.WindowStaysOnTopHint)
@@ -264,8 +280,10 @@ class SystemFileBrowser(BaseTreeViewWidget):
         super(SystemFileBrowser, self).mousePressEvent(e)
         keyboardMod = e.modifiers()
         modelIdx = self.indexAt(e.pos())
+
         if keyboardMod == QtCore.Qt.ControlModifier:
             self.expandRecursively(modelIdx, -1)
+
         if keyboardMod == QtCore.Qt.ShiftModifier:
             self._collapseHrc(qmodelIndex=modelIdx)
 

@@ -97,10 +97,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self._updateToolBarButtons()
 
+        self.centerW = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(self.centerW)
         self._tvw = suiw_assetBrowser.SystemFileBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
+        layout.addWidget(self._tvw)
+
         self.configChanged.connect(self._tvw.setConfig)
         self.themeChanged.connect(self._tvw.setTheme)
-        self.setCentralWidget(self._tvw)
+        self.setCentralWidget(self.centerW)
 
         self.resize(600, 800)
         self._instance = self
