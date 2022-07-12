@@ -2,7 +2,7 @@ import os, sys
 import logging
 from dataclasses import dataclass
 from PySide2 import QtCore
-import simplejson as sjson
+import json
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -220,7 +220,7 @@ def loadJson(filepath):
         return {}
 
     with open(filepath) as infile:
-        data = sjson.load(infile)
+        data = json.load(infile)
 
     return data
 
@@ -240,5 +240,5 @@ def saveConfig(filepath, data):
 
     logger.debug("Saving config: %s", filepath)
     with open(filepath, "w") as outfile:
-        outfile.write(sjson.dumps(data))
+        outfile.write(json.dumps(data))
 
