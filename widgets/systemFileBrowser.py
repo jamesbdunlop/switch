@@ -182,7 +182,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 srcIdx = self._proxyModel.mapToSource(rowIndices[0])
                 path = self.model().filePath(srcIdx)
 
-        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga")
+        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr")
         if os.path.isfile(path):
             _, ext = os.path.splitext(path)
             if ext in valid:
