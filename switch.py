@@ -3,7 +3,7 @@ import logging
 from functools import partial
 from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
-from widgets import systemFileBrowser as suiw_assetBrowser
+from widgets import systemFileBrowser as suiw_systemBrowser
 from widgets import configBrowser as suiw_configBrowser
 from widgets.createFolderDockWidget import CreateFolderDockWidget
 from widgets.createConfigDockWidget import CreateConfigDockWidget
@@ -57,6 +57,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         super(Switch, self).__init__(parent=parent)
         self._settings = QtCore.QSettings("JBD", "{}_v{}".format(APPNAAME, VERS))
         self._recentConfigs = list()
+        self._recentFilepaths = list()
         self.config = config
         self.configPath = self.config.projectPath() if self.config else "No config found"
         self.dw = None
@@ -85,6 +86,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.createConfig = self.fileMenu.addAction(self._fetchIcon("iconmonstr-plus-1-240"), "Create / Update Schema Config")
         self.createConfig.triggered.connect(self._createConfigUI)
         self.fileMenu.addSeparator()
+        self.recentMenu = QtWidgets.QMenu("Recent Configs: ", self)
+        self.fileMenu.addMenu(self.recentMenu)
+        self.recentFilesMenu = QtWidgets.QMenu("Recent Files: ", self)
+        self.fileMenu.addMenu(self.recentFilesMenu)
 
         self.helpMenu = QtWidgets.QMenu("Help", self)
         self.mainMenuBar.addMenu(self.helpMenu)
@@ -99,15 +104,30 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.centerW = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(self.centerW)
-        self._tvw = suiw_assetBrowser.SystemFileBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
-        layout.addWidget(self._tvw)
+        self._browserWidget = suiw_systemBrowser.SystemFileBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
+        layout.addWidget(self._browserWidget)
+        self._browserWidget.fileOpened.connect(self._updateRecentFilesMenu)
 
-        self.configChanged.connect(self._tvw.setConfig)
-        self.themeChanged.connect(self._tvw.setTheme)
+        self.configChanged.connect(self._browserWidget.setConfig)
+        self.themeChanged.connect(self._browserWidget.setTheme)
         self.setCentralWidget(self.centerW)
 
         self.resize(600, 800)
         self._instance = self
+
+    def _updateRecentFilesMenu(self, path=None):
+        if path is not None and path not in self._recentFilepaths:
+            self._recentFilepaths.append(path)
+
+        self.recentFilesMenu.clear()
+        for recentName in self._recentFilepaths:
+            if not os.path.isfile(recentName):
+                self._recentFilepaths.remove(recentName)
+                logger.debug("Removed %s from recents as it no longer exists on disk.", recentName)
+                continue
+
+            act = self.recentFilesMenu.addAction(recentName)
+            act.triggered.connect(partial(self._openFile, filepath=recentName))
 
     def _showHelp(self):
         self.helpUI = HelpView(self.themeName, self.themeColor)
@@ -140,6 +160,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         createFoldersButton.clicked.connect(self.createFolderUI)
         self.toolbar.addWidget(createFoldersButton)
 
+    def _openFile(self, filepath):
+        """Passes filepath along to the systemBrowser's file open.
+
+        Args:
+            filepath (string):
+        """
+        self._browserWidget._open(path=filepath, asFolder=False)
+
     def _loadConfig(self):
         self.configBrowser = suiw_configBrowser.ConfigBrowser(self.themeName, self.themeColor)
         self.configBrowser.show()
@@ -163,7 +191,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         else:
             tokens = self.config.rootPathTokens() + [dirName]
 
-        self._tvw.setprojectPath(tokens)
+        self._browserWidget.setprojectPath(tokens)
 
     def _createFolder(self, assetData):
         """Create the folders based off the widget's assetName and assetType
@@ -236,6 +264,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._settings.setValue("size", self.size())
         self._settings.setValue("pos", self.pos())
         self._settings.setValue("recentConfigs", self._recentConfigs)
+        self._settings.setValue("recentFilepaths", self._recentFilepaths)
         if self.config is not None:
             self._settings.setValue("lastOpened", self.config.configPath())
 
@@ -251,8 +280,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
         self.move(self._settings.value("pos", defaultValue=QtCore.QPoint(0, 0)))
 
-        self.recentMenu = QtWidgets.QMenu("Recent: ", self)
-        self.fileMenu.addMenu(self.recentMenu)
         self._recentConfigs = self._settings.value("recentConfigs", defaultValue=list())
         logger.debug("Restoring recentConfigs: %s", self._recentConfigs)
         for recentName in self._recentConfigs:
@@ -264,10 +291,15 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             act = self.recentMenu.addAction(recentName)
             act.triggered.connect(partial(self.setConfig, filepath=recentName))
 
+        self._recentFilepaths = self._settings.value("recentFilepaths", defaultValue=list())
+        logger.debug("Restoring recentConfigs: %s", self._recentConfigs)
+        self._updateRecentFilesMenu()
+
         self.fileMenu.addSeparator()
         self.exitApp = self.fileMenu.addAction(self._fetchIcon("iconmonstr-x-mark-4-icon-256"), "Exit")
         self.exitApp.triggered.connect(self.close)
 
+        # Open the previous active config when the ui was closed.
         lastOpened = self._settings.value("lastOpened", defaultValue=None)
         logger.debug("lastOpened: %s", lastOpened)
         if lastOpened is not None:
