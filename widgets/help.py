@@ -31,6 +31,7 @@ class HelpView(BaseWidget):
                   "<br>if the base folder doesn't exist." \
                   "<br>" \
                   "<br>You can perform various rightClick options here, this will try to open various file formats using your system settings." \
+                  "<br>In the systemFileBrowser.py valid = (\".ma\", \".mb\", \".obj\", \".jpg\", \".png\", \".ZPR\")" \
                   "<br>Using <b>Set As Root</b> will change the selected path as the root of the browser." \
                   "<br>Using <b> Explore to folder</b> will open a file explorer to that folder path." \
                   "<br>" \

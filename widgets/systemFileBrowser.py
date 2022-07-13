@@ -3,6 +3,7 @@ import logging
 from PySide2 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseTreeViewWidget
 from functools import partial
+
 insideMaya = False
 try:
     from maya import cmds as cmds
@@ -15,17 +16,21 @@ logger.propagate = False
 logging.basicConfig()
 
 
-class AssetBrowser(BaseTreeViewWidget):
+class SystemFileBrowser(BaseTreeViewWidget):
     def __init__(self, config, themeName, themeColor, parent=None):
-        super(AssetBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        super(SystemFileBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.config = config
         self._dir = QtCore.QDir()
         self._model = QtWidgets.QFileSystemModel()
-        self.setModel(self._model)
+        self.setSortingEnabled(True)
+        self._proxyModel = QtCore.QSortFilterProxyModel()
+        self._proxyModel.setSourceModel(self._model)
+
+        self.setModel(self._proxyModel)
         self.updateModelPath()
 
         # Fix the darn resize issues with the filebrowser
-        for colIDX in range(self._model.columnCount()):
+        for colIDX in range(self._proxyModel.sourceModel().columnCount()):
             self.header(). setSectionResizeMode(colIDX, QtWidgets.QHeaderView.ResizeToContents)
 
         # Right click
@@ -41,6 +46,22 @@ class AssetBrowser(BaseTreeViewWidget):
         logger.debug("rootPath: %s", rootPath)
         self._dir.setPath(rootPath)
         self._dir.makeAbsolute()
+        if not self.createRootFolderPath(self._dir):
+            return
+
+        self.model().setRootPath(self._dir.path())
+        idx = self.model().index(self._dir.path())
+        self.setRootIndex(self._proxyModel.mapFromSource(idx))
+
+    def createRootFolderPath(self, rootPath):
+        """Checks if the folder exists on disk. Prompts to create if it doesn't returns bool if it exists for use or not.
+
+        Args:
+            rootPath (QDir):
+
+        Returns:
+            bool
+        """
         if not os.path.exists(self._dir.path()):
             logger.warning("Root path does not exist!")
             confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Create?!",
@@ -52,9 +73,11 @@ class AssetBrowser(BaseTreeViewWidget):
                 self._dir.mkpath(rootPath)
                 for root in self.config.roots():
                     self._dir.mkpath(os.path.sep.join([rootPath, root]))
+                return True
 
-        self._model.setRootPath(self._dir.path())
-        self.setRootIndex(self._model.index(self._dir.path()))
+            return False
+
+        return True
 
     def _rcMenu(self, point):
         self.menu = QtWidgets.QMenu()
@@ -87,7 +110,8 @@ class AssetBrowser(BaseTreeViewWidget):
 
     def _importSelected(self):
         rowIndices = self.selectedIndexes()
-        path = self.model().filePath(rowIndices[0])
+        srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+        path = self.model().filePath(srcIdx)
         cmds.file(path, i=True, f=True)
 
     def _openParentFolder(self):
@@ -95,7 +119,9 @@ class AssetBrowser(BaseTreeViewWidget):
         if not rowIndices:
             path = self.model().rootDirectory().absolutePath()
         else:
-            path = self.model().filePath(rowIndices[0])
+            srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+            path = self.model().filePath(srcIdx)
+
         if " " in path:
             logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
             return
@@ -110,7 +136,8 @@ class AssetBrowser(BaseTreeViewWidget):
             if not rowIndices:
                 path = self.model().rootDirectory().absolutePath()
             else:
-                path = self.model().filePath(rowIndices[0])
+                srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+                path = self.model().filePath(srcIdx)
 
         if " " in path:
             logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
@@ -137,22 +164,25 @@ class AssetBrowser(BaseTreeViewWidget):
         if not rowIndices:
             path = self.model().rootDirectory().absolutePath()
         else:
-            path = self.model().filePath(rowIndices[0])
+            srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+            path = self.model().filePath(srcIdx)
 
-        if os.path.isfile(path):
-            return False
+        if os.path.isdir(path):
+            return True
 
-        return True
+        return False
 
     def _isValidFile(self, path=None):
         if path is None:
             rowIndices = self.selectedIndexes()
+
             if not rowIndices:
                 path = self.model().rootDirectory().absolutePath()
             else:
-                path = self.model().filePath(rowIndices[0])
+                srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+                path = self.model().filePath(srcIdx)
 
-        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR")
+        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr")
         if os.path.isfile(path):
             _, ext = os.path.splitext(path)
             if ext in valid:
@@ -162,25 +192,27 @@ class AssetBrowser(BaseTreeViewWidget):
 
     def _changeRootToSelected(self):
         rowIndices = self.selectedIndexes()
-        dirPath = self.model().filePath(rowIndices[0])
+        if not rowIndices:
+            return
+
+        srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+        dirPath = self.model().filePath(srcIdx)
         if os.path.isfile(dirPath):
             return
 
         self.setprojectPath(dirPath.split("/"))
 
     def _collapseHrc(self, qmodelIndex):
-        """Recursive method to collapse all children on shift+click
+        """Method to collapse all children on shift+click
 
         Args:
             qmodelIndex (QtCore.QModelIndex):
         """
-        if self.model().hasChildren(qmodelIndex):
-            rowCount = self.model().rowCount(qmodelIndex)
+        if self._proxyModel.hasChildren(qmodelIndex):
+            rowCount = self._proxyModel.rowCount(qmodelIndex)
             for idx in range(rowCount):
                 child = qmodelIndex.child(idx, 0)
                 self.collapse(child)
-                if self.model().hasChildren(child):
-                    self._collapseHrc(child)
 
     def _deleteSelected(self):
         confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!", "Are you sure?", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None, QtCore.Qt.WindowStaysOnTopHint)
@@ -188,7 +220,9 @@ class AssetBrowser(BaseTreeViewWidget):
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             return
         rowIndices = self.selectedIndexes()
-        path = self.model().filePath(rowIndices[0])
+
+        srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+        path = self.model().filePath(srcIdx)
         if os.path.isfile(path):
             os.remove(path)
             logger.debug("Successfully removed file!")
@@ -197,7 +231,7 @@ class AssetBrowser(BaseTreeViewWidget):
             logger.debug("Successfully removed directory!")
 
     def model(self):
-        return self._model
+        return self._proxyModel.sourceModel()
 
     def setprojectPath(self, tokens):
         """Set a new projectPath for the viewer
@@ -217,9 +251,12 @@ class AssetBrowser(BaseTreeViewWidget):
             if confirm.exec_() == QtWidgets.QMessageBox.Ok:
                 self._dir.mkpath(self._dir.path())
 
-        self._model.setRootPath(self._dir.path())
-        self.setRootIndex(self._model.index(self._dir.path()))
+        self._proxyModel.sourceModel().setRootPath(self._dir.path())
+        idx = self._proxyModel.sourceModel().index(self._dir.path())
+        self.setRootIndex(self._proxyModel.mapFromSource(idx))
+        # self.setRootIndex(self._proxyModel.sourceModel().index(self._dir.path()))
         logger.debug("Changed path to: %s", self._dir.path())
+
         try:
             # Maya's workspace
             cmds.workspace(directory=self._dir.path())
@@ -228,22 +265,25 @@ class AssetBrowser(BaseTreeViewWidget):
             pass
 
     def mouseDoubleClickEvent(self, e):
-        super(AssetBrowser, self).mouseDoubleClickEvent(e)
+        super(SystemFileBrowser, self).mouseDoubleClickEvent(e)
         modelIdx = self.indexAt(e.pos())
-        path = self.model().filePath(modelIdx)
+        srcIdx = self._proxyModel.mapToSource(modelIdx)
+        path = self.model().filePath(srcIdx)
         if self._isValidFile(path):
             logger.debug("Opening %s", path)
             if insideMaya:
                 cmds.file(path, o=True, f=True)
             else:
                 self._open(path)
-                
+
     def mousePressEvent(self, e):
-        super(AssetBrowser, self).mousePressEvent(e)
+        super(SystemFileBrowser, self).mousePressEvent(e)
         keyboardMod = e.modifiers()
         modelIdx = self.indexAt(e.pos())
+
         if keyboardMod == QtCore.Qt.ControlModifier:
             self.expandRecursively(modelIdx, -1)
+
         if keyboardMod == QtCore.Qt.ShiftModifier:
             self._collapseHrc(qmodelIndex=modelIdx)
 

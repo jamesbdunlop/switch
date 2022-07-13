@@ -1,6 +1,6 @@
 import logging
 import os, sys
-import simplejson as sjson
+import json
 from PySide2 import QtCore
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def fromJSON(themeName, themeColor):
     # theme = f"{dirPath}{os.path.sep}theme.json".replace("\\", "/")
     theme = "{}{}theme.json".format(dirPath, os.path.sep).replace("\\", "/")
     with open(theme) as f:
-        data = sjson.load(f)
+        data = json.load(f)
 
     return data
 

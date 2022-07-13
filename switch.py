@@ -3,7 +3,7 @@ import logging
 from functools import partial
 from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
-from widgets import assetBrowser as suiw_assetBrowser
+from widgets import systemFileBrowser as suiw_assetBrowser
 from widgets import configBrowser as suiw_configBrowser
 from widgets.createFolderDockWidget import CreateFolderDockWidget
 from widgets.createConfigDockWidget import CreateConfigDockWidget
@@ -97,10 +97,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self._updateToolBarButtons()
 
-        self._tvw = suiw_assetBrowser.AssetBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
+        self.centerW = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(self.centerW)
+        self._tvw = suiw_assetBrowser.SystemFileBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
+        layout.addWidget(self._tvw)
+
         self.configChanged.connect(self._tvw.setConfig)
         self.themeChanged.connect(self._tvw.setTheme)
-        self.setCentralWidget(self._tvw)
+        self.setCentralWidget(self.centerW)
 
         self.resize(600, 800)
         self._instance = self
@@ -216,6 +220,12 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.configPath = self.config.projectPath() if self.config else "No config found"
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self._updateToolBarButtons()
+
+        # Close the createFolders wwidget.
+        if self.dw is not None:
+            self.dw.close()
+            self.dw = None
+
         self.configChanged.emit(self.config)
 
     def closeEvent(self, e):
