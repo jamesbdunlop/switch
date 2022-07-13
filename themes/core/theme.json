@@ -1,8 +1,8 @@
 {
   "iconPack": "core",
-  "fontFamily": "Mandan",
-  "fontBaseSize": "12px",
-  "fontHoverSize": "14px",
+  "fontFamily": "Arial",
+  "fontBaseSize": "16px",
+  "fontHoverSize": "18px",
   "fontTabSize": "12px",
   "fontColor": "#DCDCDC",
   "fontSelectedColor" : "#212121",
