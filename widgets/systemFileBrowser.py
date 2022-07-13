@@ -17,6 +17,8 @@ logging.basicConfig()
 
 
 class SystemFileBrowser(BaseTreeViewWidget):
+    fileOpened = QtCore.Signal(str, name="fileOpened")
+
     def __init__(self, config, themeName, themeColor, parent=None):
         super(SystemFileBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.config = config
@@ -275,6 +277,8 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 cmds.file(path, o=True, f=True)
             else:
                 self._open(path)
+
+            self.fileOpened.emit(path)
 
     def mousePressEvent(self, e):
         super(SystemFileBrowser, self).mousePressEvent(e)
