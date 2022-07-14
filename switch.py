@@ -91,6 +91,15 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.recentFilesMenu = QtWidgets.QMenu("Recent Files: ", self)
         self.fileMenu.addMenu(self.recentFilesMenu)
 
+        self.themeMenu = QtWidgets.QMenu("Theme", self)
+        self.mainMenuBar.addMenu(self.themeMenu)
+        baseMenu = self.themeMenu.addAction("Dark")
+        baseMenu.triggered.connect(partial(self.setTheme, self.themeName, ""))
+        blueMenu = self.themeMenu.addAction("Blue")
+        blueMenu.triggered.connect(partial(self.setTheme, self.themeName, "blue"))
+        greenMenu = self.themeMenu.addAction("Green")
+        greenMenu.triggered.connect(partial(self.setTheme, self.themeName, "green"))
+
         self.helpMenu = QtWidgets.QMenu("Help", self)
         self.mainMenuBar.addMenu(self.helpMenu)
         helpMenu = self.helpMenu.addAction("Overview")
