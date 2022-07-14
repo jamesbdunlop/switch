@@ -93,7 +93,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.themeMenu = QtWidgets.QMenu("Theme", self)
         self.mainMenuBar.addMenu(self.themeMenu)
-        baseMenu = self.themeMenu.addAction("Base")
+        baseMenu = self.themeMenu.addAction("Dark")
         baseMenu.triggered.connect(partial(self.setTheme, self.themeName, ""))
         blueMenu = self.themeMenu.addAction("Blue")
         blueMenu.triggered.connect(partial(self.setTheme, self.themeName, "blue"))
