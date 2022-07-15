@@ -55,7 +55,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             parent (QtWidget):
         """
         super(Switch, self).__init__(parent=parent)
-        self._settings = QtCore.QSettings("JBD", "{}_v{}".format(APPNAAME, VERS))
+        self._settings = QtCore.QSettings("JBD", "{}_settings".format(APPNAAME))
         self._recentConfigs = list()
         self._recentFilepaths = list()
         self.config = config
