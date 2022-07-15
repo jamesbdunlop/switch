@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.0.3"
+VERS = "0.0.4"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
@@ -61,6 +61,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.config = config
         self.configPath = self.config.projectPath() if self.config else "No config found"
         self.dw = None
+        self.configDockWidget = None
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self.setObjectName("{}_mainWindow".format(APPNAAME))
@@ -183,10 +184,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.configBrowser.fileSelected.connect(self.setConfig)
 
     def _createConfigUI(self):
-        self.dw = CreateConfigDockWidget(self.themeName, self.themeColor)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dw)
-        self.dw.setFloating(True)
-        self.dw.resize(800, 600)
+        self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
+        self.configDockWidget.setFloating(True)
+        self.configDockWidget.resize(800, 600)
 
     def _changeRoot(self, dirName="root"):
         """Change the root dir of the treeView to be that of the clicked root button
@@ -234,6 +235,8 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         """
         self.sheet = st_factory.getThemeData(themeName, themeColor)
+        self.themeName = themeName
+        self.themeColor = themeColor
         self.setStyleSheet(self.sheet)
         self.themeChanged.emit([self.themeName, self.themeColor])
 
