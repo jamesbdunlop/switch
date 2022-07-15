@@ -184,10 +184,13 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.configBrowser.fileSelected.connect(self.setConfig)
 
     def _createConfigUI(self):
-        self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
-        self.configDockWidget.setFloating(True)
-        self.configDockWidget.resize(800, 600)
+        if self.configDockWidget is None:
+            self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
+            self.configDockWidget.setFloating(True)
+            self.configDockWidget.resize(800, 600)
+        else:
+            self.configDockWidget.show()
 
     def _changeRoot(self, dirName="root"):
         """Change the root dir of the treeView to be that of the clicked root button
