@@ -317,7 +317,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         # Open the previous active config when the ui was closed.
         lastOpened = self._settings.value("lastOpened", defaultValue=None)
         logger.debug("lastOpened: %s", lastOpened)
-        if lastOpened is not None:
+        if lastOpened is not None and isinstance(lastOpened, str):
             logger.debug("Opening previous config: %s", lastOpened)
             if os.path.isfile(lastOpened):
                 self.setConfig(lastOpened)
