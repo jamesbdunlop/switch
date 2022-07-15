@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.0.3"
+VERS = "0.0.4"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
@@ -55,12 +55,13 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             parent (QtWidget):
         """
         super(Switch, self).__init__(parent=parent)
-        self._settings = QtCore.QSettings("JBD", "{}_v{}".format(APPNAAME, VERS))
+        self._settings = QtCore.QSettings("JBD", "{}_settings".format(APPNAAME))
         self._recentConfigs = list()
         self._recentFilepaths = list()
         self.config = config
         self.configPath = self.config.projectPath() if self.config else "No config found"
         self.dw = None
+        self.configDockWidget = None
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self.setObjectName("{}_mainWindow".format(APPNAAME))
@@ -183,10 +184,13 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.configBrowser.fileSelected.connect(self.setConfig)
 
     def _createConfigUI(self):
-        self.dw = CreateConfigDockWidget(self.themeName, self.themeColor)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dw)
-        self.dw.setFloating(True)
-        self.dw.resize(800, 600)
+        if self.configDockWidget is None:
+            self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
+            self.configDockWidget.setFloating(True)
+            self.configDockWidget.resize(800, 600)
+        else:
+            self.configDockWidget.show()
 
     def _changeRoot(self, dirName="root"):
         """Change the root dir of the treeView to be that of the clicked root button
@@ -234,6 +238,8 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         """
         self.sheet = st_factory.getThemeData(themeName, themeColor)
+        self.themeName = themeName
+        self.themeColor = themeColor
         self.setStyleSheet(self.sheet)
         self.themeChanged.emit([self.themeName, self.themeColor])
 
