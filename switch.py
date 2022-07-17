@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.0.4"
+VERS = "0.0.5"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
