@@ -69,3 +69,4 @@ class BaseDockWidget(QtWidgets.QDockWidget, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
         QtWidgets.QDockWidget.__init__(self, parent=parent)
         ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+        self.setTheme([themeName, themeColor])

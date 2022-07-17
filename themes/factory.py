@@ -85,6 +85,17 @@ def fromJSON(themeName, themeColor):
     return data
 
 
+def toJSON(data, themeName, themeColor):
+    dirPath = "{}{}{}_{}".format(PATH, os.path.sep, themeName, themeColor)
+    if not themeColor:
+        dirPath = "{}{}{}".format(PATH, os.path.sep, themeName)
+
+    filepath = "{}{}theme.json".format(dirPath, os.path.sep).replace("\\", "/")
+    logger.debug("Saving config: %s", filepath)
+    with open(filepath, "w") as outfile:
+        outfile.write(json.dumps(data))
+
+
 def getThemeData(themeName, themeColor):
     """
 

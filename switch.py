@@ -11,6 +11,7 @@ from widgets.base import IconMixin
 from widgets.help import HelpView
 from services import folderManager as ss_folderManager
 from services import configManger as ss_configManager
+from widgets.createThemeEditorDockWidget import ThemeEditorDockWidget
 
 insideMaya = False
 try:
@@ -94,6 +95,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.themeMenu = QtWidgets.QMenu("Theme", self)
         self.mainMenuBar.addMenu(self.themeMenu)
+        editMenu = self.themeMenu.addAction("Edit")
+        editMenu.triggered.connect(self._editTheme)
+
         baseMenu = self.themeMenu.addAction("Dark")
         baseMenu.triggered.connect(partial(self.setTheme, self.themeName, ""))
         blueMenu = self.themeMenu.addAction("Blue")
@@ -124,6 +128,11 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.resize(600, 800)
         self._instance = self
+
+    def _editTheme(self):
+        self.editThemeUI = ThemeEditorDockWidget(themeName=self.themeName, themeColor=self.themeColor)
+        self.editThemeUI.themeChanged.connect(self._themeEdited)
+        self.editThemeUI.show()
 
     def _updateRecentFilesMenu(self, path=None):
         if path is not None and path not in self._recentFilepaths:
@@ -227,6 +236,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         else:
             self.dw.show()
 
+    def _themeEdited(self, edit):
+        if edit:
+            self.setTheme(self.themeName, self.themeColor)
+
     def setTheme(self, themeName, themeColor):
         """
 
@@ -280,6 +293,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._settings.setValue("pos", self.pos())
         self._settings.setValue("recentConfigs", self._recentConfigs)
         self._settings.setValue("recentFilepaths", self._recentFilepaths)
+        self._settings.setValue("themeName", self.themeName)
+        self._settings.setValue("themeColor", self.themeColor)
+
         if self.config is not None:
             self._settings.setValue("lastOpened", self.config.configPath())
 
@@ -321,6 +337,11 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             logger.debug("Opening previous config: %s", lastOpened)
             if os.path.isfile(lastOpened):
                 self.setConfig(lastOpened)
+
+        # Theme restore
+        themeName = self._settings.value("themeName", defaultValue="core")
+        themeColor = self._settings.value("themeColor", defaultValue="")
+        self.setTheme(themeName, themeColor)
 
         self._settings.endGroup()
 
