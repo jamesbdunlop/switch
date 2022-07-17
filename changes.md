@@ -1,3 +1,11 @@
+## v0.0.5
+
+Improvements
+---
+- Themes now store in the QSettings
+- Added an edit for the theme to change the base theme.json
+
+
 ## v0.0.4
 
 Fixes
