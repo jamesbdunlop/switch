@@ -221,7 +221,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             assetData (list[assetName, assetType]):
         """
         assetName, assetType = assetData
-        logger.debug("Creating folders: %s %s", assetName, assetType)
         ss_folderManager.createFolders(self.config, assetType, assetName)
 
     def createFolderUI(self):
