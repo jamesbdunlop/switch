@@ -104,7 +104,7 @@ class Config:
         return self.data.get("configRoot", "")
 
     def rootPathTokens(self):
-        return self.projectPathTokens() + [self.configRoot()]
+        return self.projectPathTokens() + [self.projectName(), self.configRoot()]
 
 
 def getConfigByFilePath(filepath):

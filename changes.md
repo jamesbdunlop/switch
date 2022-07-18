@@ -1,3 +1,8 @@
+Fixes
+---
+- Fixed project path so you don't need the project name in it too.
+
+
 ## v0.0.5
 
 Improvements
