@@ -1,7 +1,7 @@
 Fixes
 ---
 - Fixed project path so you don't need the project name in it too.
-
+- Basic drag and drop added for copy/move of files.
 
 ## v0.0.5
 

@@ -1,5 +1,6 @@
 import os, shutil
 import logging
+import shutil
 from PySide2 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseTreeViewWidget
 from functools import partial
@@ -25,8 +26,14 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self._dir = QtCore.QDir()
         self._model = QtWidgets.QFileSystemModel()
         self.setSortingEnabled(True)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+
         self._proxyModel = QtCore.QSortFilterProxyModel()
         self._proxyModel.setSourceModel(self._model)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
 
         self.setModel(self._proxyModel)
         self.updateModelPath()
@@ -231,6 +238,43 @@ class SystemFileBrowser(BaseTreeViewWidget):
         elif os.path.isdir(path):
             shutil.rmtree(path)
             logger.debug("Successfully removed directory!")
+
+    def dragMoveEvent(self, event) -> None:
+        super(SystemFileBrowser, self).dragMoveEvent(event)
+        # print("dragMoveEvent: %s", event.mimeData().urls())
+        pos = event.pos()
+        idx = self.indexAt(pos)
+        srcIdx = self._proxyModel.mapToSource(idx)
+        path = self.model().filePath(srcIdx)
+        if os.path.isdir(path):
+            return event.accept()
+
+    def dragEnterEvent(self, event) -> None:
+        super(SystemFileBrowser, self).dragEnterEvent(event)
+        for url in event.mimeData().urls():
+            # print(event.proposedAction()) # PySide2.QtCore.Qt.DropAction.MoveAction
+            filePath = url.toLocalFile()
+            if not os.path.isfile(filePath):
+                # We don't allow moving folders.
+                return event.ignore()
+
+        return event.accept()
+
+    def dropEvent(self, event) -> None:
+        super(SystemFileBrowser, self).dropEvent(event)
+        # drop location
+        pos = event.pos()
+        idx = self.indexAt(pos)
+        srcIdx = self._proxyModel.mapToSource(idx)
+        destPath = self.model().filePath(srcIdx)
+
+        for url in event.mimeData().urls():
+            srcPath = url.toLocalFile()
+            fileName = srcPath.split("/")[-1]
+            if event.keyboardModifiers() == QtCore.Qt.ControlModifier:
+                shutil.copy2(srcPath, os.path.sep.join([destPath, fileName]))
+            else:
+                shutil.move(srcPath, os.path.sep.join([destPath, fileName]))
 
     def model(self):
         return self._proxyModel.sourceModel()
