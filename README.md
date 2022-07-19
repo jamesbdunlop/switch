@@ -18,7 +18,7 @@ switch.run()
 ````
 ____
 
-##Making standalone switch.exe  
+## Making standalone switch.exe  
 ````
 python setup.py py2exe
 ````
