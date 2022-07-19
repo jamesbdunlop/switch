@@ -69,6 +69,7 @@ class HelpView(BaseWidget):
                   "<table>" \
                   "<tr><td> &nbsp;&nbsp;<b>ctrl + leftclick  treeItem&nbsp;&nbsp;:</b></td><td>Expand to depth.</td></tr>" \
                   "<tr><td> &nbsp;&nbsp;<b>shft + leftclick  treeItem&nbsp;&nbsp;:</b></td><td>Collapse all under selected.</td></tr>" \
+                  "<tr><td> &nbsp;&nbsp;<b>drag + control  treeItem&nbsp;&nbsp;:</b></td><td>Copy Dragged file instead of move.</td></tr>" \
                   "</table>" \
                   "</body>"
 
