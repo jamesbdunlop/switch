@@ -31,17 +31,17 @@ Requirements will be valid paths for
 Screenshots
 -----------
 
-The main UI
+The main UI<br>
 ![main_ui](media/main_ui_ss.png)
 
-Adding folders using the createFolders button
+Adding folders using the createFolders button<br>
 ![main_ui](media/createFolders_ui_ss.png)
 
-The config editor to quickly make the json files for the folder schema to use.
+The config editor to quickly make the json files for the folder schema to use.<br>
 ![main_ui](media/createConfig_ui_ss.png)
 
-Previewing the folders 
+Previewing the folders<br>
 ![main_ui](media/preview_ui_ss.png)
 
-The help widget
+The help widget<br>
 ![main_ui](media/help_ui_ss.png)
