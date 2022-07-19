@@ -1,3 +1,5 @@
+## v0.1.0
+
 Fixes
 ---
 - Fixed project path so you don't need the project name in it too.
