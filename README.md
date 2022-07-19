@@ -27,3 +27,21 @@ Requirements will be valid paths for
 
 ('platforms', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll']),
 ````
+
+Screenshots
+-----------
+
+The main UI
+![main_ui](media/main_ui_ss.png)
+
+Adding folders using the createFolders button
+![main_ui](media/createFolders_ui_ss.png)
+
+The config editor to quickly make the json files for the folder schema to use.
+![main_ui](media/createConfig_ui_ss.png)
+
+Previewing the folders 
+![main_ui](media/preview_ui_ss.png)
+
+The help widget
+![main_ui](media/help_ui_ss.png)
