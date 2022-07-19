@@ -1,5 +1,6 @@
 # switch
-Small folder management system for windows projects at home
+Small folder Windows folder management system for projects at home. Runs as a dockWidget inside maya and as <br>
+standalone if you compile using py2exe (see below)...
 
 ## Maya
 Run the following inside Maya to create a dockable dockWidget.
@@ -15,18 +16,16 @@ from switch import switch as switch
 importlib.reload(switch)
 switch.run()
 ````
+____
 
-##Making standalone exe use 
+##Making standalone switch.exe  
 ````
 python setup.py py2exe
 ````
-in the switch folder. This will build into the dist folder.
-Requirements will be valid paths for
-````
-('imageformats', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\imageformats\qico.dll']),
+From the commandline inside the switch folder run the above command.<br> 
+This will build into the dist folder and you can run the switch.exe from there.
 
-('platforms', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll']),
-````
+____
 
 Screenshots
 -----------
