@@ -25,13 +25,12 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.0.5"
+VERS = "0.1.0"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
 DOCKTILE = '{} v{}'.format(APPNAAME, VERS)
 
-# TODO: Fix project path so you don't need the project name in it too.
 # TODO: Work out the instancing for the final app, so it doesn't keep opening new instances of.
 # TODO: Workspace isn't switching in maya when setting root.
 
@@ -60,7 +59,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._recentConfigs = list()
         self._recentFilepaths = list()
         self.config = config
-        self.configPath = self.config.projectPath() if self.config else "No config found"
+        self.configPath = os.path.join(self.config.projectPath(), self.config.projectName()) if self.config else "No config found"
         self.dw = None
         self.configDockWidget = None
 
@@ -399,7 +398,7 @@ if __name__ == "__main__":
     lastOpened = _settings.value("lastOpened", defaultValue=None)
     _settings.endGroup()
     qtapp = QtWidgets.QApplication(sys.argv)
-    logger.info("Starting {} v{} standalone...".format(qtapp.applicationName(), qtapp.applicationVersion()))
+    logger.debug("Starting {} v{} standalone...".format(qtapp.applicationName(), qtapp.applicationVersion()))
     qtapp.setQuitOnLastWindowClosed(True)
     qtapp.setApplicationName(APPNAAME)
     qtapp.setApplicationVersion(VERS)
