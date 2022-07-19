@@ -40,7 +40,7 @@ class HelpView(BaseWidget):
                   "<br>This is stored in a .json format in the configs folder. <br><b>Required data:</b>" \
                   "<table>" \
                   "<tr><td><b>\"projectName\"</b>:</td><td>&nbsp;&nbsp;This is the name of the project.</td></tr>" \
-                  "<tr><td><b>\"projectPath\"</b>:</td><td>&nbsp;&nbsp;This is the root folder path on disk. eg: D:/myprojects/projectName" \
+                  "<tr><td><b>\"projectPath\"</b>:</td><td>&nbsp;&nbsp;This is the root folder path on disk. eg: D:/myprojects" \
                   "<tr><td><b>\"configRoot\"</b>:</td><td>&nbsp;&nbsp;This is the base folder under the rootFolderPath for this config. eg: Assets" \
                   "<tr><td><b>\"ROOTS\":</b> {}</td><td>&nbsp;&nbsp;This is a dict of folder pairs. Roots tend to have None as their folder structure." \
                   "<tr><td><b>\"BASEFOLDERS\":</b> {}</td><td>&nbsp;&nbsp;This is the dict of the root folders that get created using the Create Fodlers button. " \

@@ -1,12 +1,16 @@
-## v0.1.0
+## v0.1.1
+Fixes
+---
+- Fixed help info to remove projectName from the projectPath
 
+
+## v0.1.0
 Fixes
 ---
 - Fixed project path so you don't need the project name in it too.
 - Basic drag and drop added for copy/move of files.
 
 ## v0.0.5
-
 Improvements
 ---
 - Themes now store in the QSettings

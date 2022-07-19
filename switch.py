@@ -1,3 +1,5 @@
+# 2022: Author James Dunlop: james@anim83d.com
+
 import sys, os
 import logging
 from functools import partial
@@ -25,7 +27,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.1.0"
+VERS = "0.1.1"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
