@@ -33,6 +33,9 @@ Screenshots
 The main UI<br>
 ![main_ui](media/main_ui_ss.png)
 
+Inside Maya<br>
+![main_ui](media/mayadock_ss.png)
+
 Adding folders using the createFolders button<br>
 ![main_ui](media/createFolders_ui_ss.png)
 
