@@ -60,6 +60,10 @@ class Config:
         return data
 
     def name(self):
+        """Returns name of the config being used
+
+        Returns (string):
+        """
         return self._configName
 
     def setName(self, confgName):

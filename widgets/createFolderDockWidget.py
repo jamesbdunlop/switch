@@ -33,8 +33,6 @@ class CreateFolderDockWidget(BaseDockWidget):
         self.inputName = QtWidgets.QLineEdit()
         self.inputName.setPlaceholderText("... input the name of the asset. Press enter to commit.")
         self.inputName.returnPressed.connect(self._emit)
-        self.inputName.returnPressed.connect(self.close)
-        self.inputName.returnPressed.connect(self.widget.close)
 
         self.mainLayout.addLayout(self.bl)
         self.mainLayout.addWidget(self.inputName)

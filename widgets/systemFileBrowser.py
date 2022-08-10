@@ -33,6 +33,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
 
         self._proxyModel = QtCore.QSortFilterProxyModel()
         self._proxyModel.setSourceModel(self._model)
+        self._proxyModel.setRecursiveFilteringEnabled(True)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
 
         self.setModel(self._proxyModel)
@@ -191,7 +192,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 srcIdx = self._proxyModel.mapToSource(rowIndices[0])
                 path = self.model().filePath(srcIdx)
 
-        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr")
+        valid = (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL")
         if os.path.isfile(path):
             _, ext = os.path.splitext(path)
             if ext in valid:
@@ -277,6 +278,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 shutil.move(srcPath, os.path.sep.join([destPath, fileName]))
 
     def model(self):
+        """Returns the QFileSystemModel from the proxyModel"""
         return self._proxyModel.sourceModel()
 
     def setprojectPath(self, tokens):
@@ -311,6 +313,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             pass
 
     def mouseDoubleClickEvent(self, e):
+        """Overload the mouseDoubleClick for checking filepaths"""
         super(SystemFileBrowser, self).mouseDoubleClickEvent(e)
         modelIdx = self.indexAt(e.pos())
         srcIdx = self._proxyModel.mapToSource(modelIdx)
@@ -325,6 +328,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             self.fileOpened.emit(path)
 
     def mousePressEvent(self, e):
+        """Overload the mousePressEvent for keyboard mods"""
         super(SystemFileBrowser, self).mousePressEvent(e)
         keyboardMod = e.modifiers()
         modelIdx = self.indexAt(e.pos())
@@ -336,5 +340,10 @@ class SystemFileBrowser(BaseTreeViewWidget):
             self._collapseHrc(qmodelIndex=modelIdx)
 
     def setConfig(self, config):
+        """Change the config being used by the fileSystem.
+
+        Args:
+            config (Config):
+        """
         self.config = config
         self.updateModelPath()
