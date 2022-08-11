@@ -110,6 +110,8 @@ class Config:
     def rootPathTokens(self):
         return self.projectPathTokens() + [self.projectName(), self.configRoot()]
 
+    def validExtensions(self):
+        return self.data.get("validExt", (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL", ".lys", ".dlp"))
 
 def getConfigByFilePath(filepath):
     """

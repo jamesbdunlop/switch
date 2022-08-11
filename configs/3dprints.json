@@ -1,0 +1,40 @@
+{
+  "projectName": "anycubicUltra",
+  "projectPath": "E:/3D_Prints",
+  "configRoot": "3dprints",
+  "validExt": [".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL", ".lys", ".dlp"],
+  "ROOTS": {
+    "character": null,
+    "prop": null
+  },
+  "BASEFOLDERS": {
+    "photos": "PHOTOS",
+    "slicer": "SLICERS",
+    "modelPrep": "MODELPREP",
+    "dlp_final": null
+  },
+  "OBJ": {
+    "withSupports": null
+  },
+  "PHOTOS": {
+    "raw": null
+  },
+  "MODELPREP": {
+    "objs": "OBJ",
+    "maya": null,
+    "stl": "STL"
+  },
+  "SLICERS": {
+    "lychee": null,
+    "chitu": null,
+    "photonWShp": null,
+    "_dlpWIP": null
+  },
+  "TESTS": {
+    "matrix": null,
+    "rook": null
+  },
+  "STL": {
+    "withSupports": null
+  }
+}

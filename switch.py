@@ -67,7 +67,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self.setObjectName("{}_mainWindow".format(APPNAAME))
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowIcon(QtGui.QIcon(QtCore.QDir(os.path.join(APP_ICONPATH, "switch.ico")).absolutePath()))
 
         self.themeName = themeName if themeName is not None else "core"
@@ -96,8 +96,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.themeMenu = QtWidgets.QMenu("Theme", self)
         self.mainMenuBar.addMenu(self.themeMenu)
+        self.toggleOnTopRB = self.themeMenu.addAction("onTop")
+        self.toggleOnTopRB.setCheckable(True)
+        self.toggleOnTopRB.toggled.connect(self._toggleOnTop)
+        self.themeMenu.addSeparator()
+
         editMenu = self.themeMenu.addAction("Edit")
         editMenu.triggered.connect(self._editTheme)
+        self.themeMenu.addSeparator()
 
         baseMenu = self.themeMenu.addAction("Dark")
         baseMenu.triggered.connect(partial(self.setTheme, self.themeName, ""))
@@ -179,6 +185,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         createFoldersButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-add-folder-icon-256"), "CreateFolders")
         createFoldersButton.clicked.connect(self.createFolderUI)
         self.toolbar.addWidget(createFoldersButton)
+
+    def _toggleOnTop(self, sender):
+        if sender:
+            self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+            self.show()
+        else:
+            self.setWindowFlags(QtCore.Qt.Window)
+            self.show()
 
     def _openFile(self, filepath):
         """Passes filepath along to the systemBrowser's file open.
@@ -307,6 +321,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         super(Switch, self).show()
         logger.debug("Applying windows settings now...")
         self._settings.beginGroup("mainWindow")
+
         # See Window Geometry for a discussion on why it is better to call QWidget::resize() and QWidget::move() rather
         # than QWidget::setGeometry() to restore a window's geometry.
         self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))

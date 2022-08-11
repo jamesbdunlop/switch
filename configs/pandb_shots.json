@@ -2,6 +2,7 @@
   "projectName": "pandb",
   "projectPath": "E:/3D_Projects/projects",
   "configRoot": "sequences",
+  "validExt": [".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL", ".lys", ".dlp"],
   "ROOTS": {
     "Seq001": null
   },
