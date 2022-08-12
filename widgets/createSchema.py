@@ -216,7 +216,7 @@ class CreateSchemaWidget(BaseWidget):
         self._projectPathInput.setText(configData.get("projectPath", ""))
         self._projectRootName.setText(configData.get("configRoot", ""))
 
-        ignore = ("projectName", "projectPath", "configRoot")
+        ignore = ("projectName", "projectPath", "configRoot", "validExt")
         for folderStructureName, data in configData.items():
             if folderStructureName in ignore:
                 continue
