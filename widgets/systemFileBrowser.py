@@ -17,6 +17,33 @@ logger.propagate = False
 logging.basicConfig()
 
 
+class Proxy(QtCore.QSortFilterProxyModel):
+    def __init__(self, parent=None):
+        QtCore.QSortFilterProxyModel.__init__(self, parent=parent)
+
+    def lessThan(self, left, right):
+        leftData = self.sourceModel().data(left, QtCore.Qt.ItemDataRole.DisplayRole)
+        rightData = self.sourceModel().data(right, QtCore.Qt.ItemDataRole.DisplayRole)
+        left_tokens = leftData.split(" ")
+        right_tokens = rightData.split(" ")
+        # ['15/07/2022', '1:16', 'AM']
+        if left_tokens[-1] in ("AM", "PM"):
+            date_tokens = left_tokens[0].split("/")
+            date = QtCore.QDate(int(date_tokens[-1]), int(date_tokens[1]), int(date_tokens[0]))
+            time_tokens = left_tokens[1].split(":")
+            time = QtCore.QTime(int(time_tokens[0]), int(time_tokens[1]), 0)
+            dtLeft = QtCore.QDateTime(date, time)
+
+            rdate_tokens = right_tokens[0].split("/")
+            rdate = QtCore.QDate(int(rdate_tokens[-1]), int(rdate_tokens[1]), int(rdate_tokens[0]))
+            rtime_tokens = right_tokens[1].split(":")
+            rtime = QtCore.QTime(int(rtime_tokens[0]), int(rtime_tokens[1]), 0)
+            dtRight = QtCore.QDateTime(rdate, rtime)
+            return dtLeft < dtRight
+        else:
+            return QtCore.QSortFilterProxyModel.lessThan(self, left, right)
+
+
 class SystemFileBrowser(BaseTreeViewWidget):
     fileOpened = QtCore.Signal(str, name="fileOpened")
 
@@ -31,7 +58,8 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self.setAcceptDrops(True)
         self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
 
-        self._proxyModel = QtCore.QSortFilterProxyModel()
+        # self._proxyModel = QtCore.QSortFilterProxyModel()
+        self._proxyModel = Proxy()
         self._proxyModel.setSourceModel(self._model)
         self._proxyModel.setRecursiveFilteringEnabled(True)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
@@ -230,15 +258,15 @@ class SystemFileBrowser(BaseTreeViewWidget):
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             return
         rowIndices = self.selectedIndexes()
-
-        srcIdx = self._proxyModel.mapToSource(rowIndices[0])
-        path = self.model().filePath(srcIdx)
-        if os.path.isfile(path):
-            os.remove(path)
-            logger.debug("Successfully removed file!")
-        elif os.path.isdir(path):
-            shutil.rmtree(path)
-            logger.debug("Successfully removed directory!")
+        for row in rowIndices:
+            srcIdx = self._proxyModel.mapToSource(row)
+            path = self.model().filePath(srcIdx)
+            if os.path.isfile(path):
+                os.remove(path)
+                logger.debug("Successfully removed file!")
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+                logger.debug("Successfully removed directory!")
 
     def dragMoveEvent(self, event) -> None:
         super(SystemFileBrowser, self).dragMoveEvent(event)

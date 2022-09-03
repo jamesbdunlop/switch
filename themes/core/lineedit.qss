@@ -14,7 +14,7 @@ QLineEdit:!selected {
  background: $level00;
 
  border: 2px;
- border-radius: 16px;
+ border-radius: 6px;
  border-color: $level00;
  padding: 0 8px;
 }
