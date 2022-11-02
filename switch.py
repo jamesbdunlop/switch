@@ -146,7 +146,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             self._recentFilepaths.append(path)
 
         self.recentFilesMenu.clear()
-        for recentName in self._recentFilepaths:
+        for recentName in self._recentFilepaths[:10]:
             if not os.path.isfile(recentName):
                 self._recentFilepaths.remove(recentName)
                 logger.debug("Removed %s from recents as it no longer exists on disk.", recentName)
