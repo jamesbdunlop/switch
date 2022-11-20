@@ -34,6 +34,7 @@ class AddFolderLayout(BaseWidget):
         self.wl.addLayout(self.buttonLayout)
 
         self.resize(500, 100)
+        self.setTheme((themeName, themeColor))
 
     def _commit(self):
         name = str(self.nameInput.text())

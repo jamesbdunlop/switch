@@ -375,3 +375,166 @@ class SystemFileBrowser(BaseTreeViewWidget):
         """
         self.config = config
         self.updateModelPath()
+
+
+class CustomFileBrowser(BaseTreeViewWidget):
+    def __init__(self, rootDir, themeName, themeColor, parent=None):
+        super(CustomFileBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        self._dir = QtCore.QDir()
+        self._model = QtWidgets.QFileSystemModel()
+        self.setSortingEnabled(True)
+
+        self.setDragEnabled(True)
+        self.setAcceptDrops(True)
+        self.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+
+        # self._proxyModel = QtCore.QSortFilterProxyModel()
+        self._proxyModel = Proxy()
+        self._proxyModel.setSourceModel(self._model)
+        self._proxyModel.setRecursiveFilteringEnabled(True)
+        self.setSelectionMode(QtWidgets.QAbstractItemView.ContiguousSelection)
+
+        self.setModel(self._proxyModel)
+
+        # Fix the darn resize issues with the filebrowser
+        for colIDX in range(self._proxyModel.sourceModel().columnCount()):
+            self.header(). setSectionResizeMode(colIDX, QtWidgets.QHeaderView.ResizeToContents)
+
+        self._dir.setPath(rootDir)
+        self._dir.makeAbsolute()
+        self.model().setRootPath(self._dir.path())
+        idx = self.model().index(self._dir.path())
+        self.setRootIndex(self._proxyModel.mapFromSource(idx))
+
+        # Right click
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._rcMenu)
+
+    def _rcMenu(self, point):
+        self.menu = QtWidgets.QMenu()
+        self.menu.setTitle("Actions:")
+        self.menu.setWindowTitle("rcMenu")
+        self.menu.setStyleSheet(self.sheet)
+
+        deleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-x-mark-5-240"), "DELETE")
+        deleteAction.triggered.connect(self._deleteSelected)
+
+        self.menu.move(self.mapToGlobal(point))
+        self.menu.show()
+
+    def _open(self, sender=None, path=None, asFolder=False):
+        if path is None:
+            rowIndices = self.selectedIndexes()
+            if not rowIndices:
+                path = self.model().rootDirectory().absolutePath()
+            else:
+                srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+                path = self.model().filePath(srcIdx)
+
+        if " " in path:
+            logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
+            return
+
+        if asFolder:
+            if not os.path.isdir(path):
+                path = os.path.dirname(path)
+            logger.debug("System: opening %s", path)
+            service = QtGui.QDesktopServices()
+            service.openUrl(QtCore.QUrl(path))
+            return
+
+    def _isValidFile(self, path=None):
+        if path is None:
+            rowIndices = self.selectedIndexes()
+
+            if not rowIndices:
+                path = self.model().rootDirectory().absolutePath()
+            else:
+                srcIdx = self._proxyModel.mapToSource(rowIndices[0])
+                path = self.model().filePath(srcIdx)
+
+        return os.path.isfile(path)
+
+    def _deleteSelected(self):
+        confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!", "Are you sure?", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None, QtCore.Qt.WindowStaysOnTopHint)
+        confirm.setStyleSheet(self.sheet)
+        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+            return
+        rowIndices = self.selectedIndexes()
+        for row in rowIndices:
+            srcIdx = self._proxyModel.mapToSource(row)
+            path = self.model().filePath(srcIdx)
+            if os.path.isfile(path):
+                os.remove(path)
+                logger.debug("Successfully removed file!")
+            elif os.path.isdir(path):
+                shutil.rmtree(path)
+                logger.debug("Successfully removed directory!")
+
+    def model(self):
+        """Returns the QFileSystemModel from the proxyModel"""
+        return self._proxyModel.sourceModel()
+
+    def dragMoveEvent(self, event) -> None:
+        super(CustomFileBrowser, self).dragMoveEvent(event)
+        pos = event.pos()
+        idx = self.indexAt(pos)
+        srcIdx = self._proxyModel.mapToSource(idx)
+        path = self.model().filePath(srcIdx)
+        logger.debug("path: %s", path)
+        if not path:
+            path = self._dir.path()
+        
+        if os.path.isdir(path):
+            return event.accept()
+
+    def dragEnterEvent(self, event) -> None:
+        super(CustomFileBrowser, self).dragEnterEvent(event)
+        for url in event.mimeData().urls():
+            filePath = url.toLocalFile()
+            logger.debug("filepath: %s", filePath)
+            if not os.path.isfile(filePath):
+                # We don't allow moving folders.
+                return event.ignore()
+
+        return event.accept()
+
+    def dropEvent(self, event) -> None:
+        super(CustomFileBrowser, self).dropEvent(event)
+        # drop location
+        pos = event.pos()
+        idx = self.indexAt(pos)
+        srcIdx = self._proxyModel.mapToSource(idx)
+        destPath = self.model().filePath(srcIdx)
+        if not destPath:
+            destPath = self._dir.path()
+            logger.info("No valid drop path found, setting to root: %s", destPath)
+
+        for url in event.mimeData().urls():
+            srcPath = url.toLocalFile()
+            fileName = srcPath.split("/")[-1]
+            if event.keyboardModifiers() == QtCore.Qt.ControlModifier:
+                shutil.copy2(srcPath, os.path.sep.join([destPath, fileName]))
+            else:
+                shutil.move(srcPath, os.path.sep.join([destPath, fileName]))
+
+    def model(self):
+        """Returns the QFileSystemModel from the proxyModel"""
+        return self._proxyModel.sourceModel()
+
+    def mouseDoubleClickEvent(self, e):
+        """Overload the mouseDoubleClick for checking filepaths"""
+        super(CustomFileBrowser, self).mouseDoubleClickEvent(e)
+        modelIdx = self.indexAt(e.pos())
+        srcIdx = self._proxyModel.mapToSource(modelIdx)
+        path = self.model().filePath(srcIdx)
+        if self._isValidFile(path):
+            logger.debug("Opening %s", path)
+            self._open(path)
+            self.fileOpened.emit(path)
+
+    def mousePressEvent(self, e):
+        """Overload the mousePressEvent for keyboard mods"""
+        super(CustomFileBrowser, self).mousePressEvent(e)
+        keyboardMod = e.modifiers()
+        modelIdx = self.indexAt(e.pos())

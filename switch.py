@@ -9,6 +9,7 @@ from widgets import systemFileBrowser as suiw_systemBrowser
 from widgets import configBrowser as suiw_configBrowser
 from widgets.createFolderDockWidget import CreateFolderDockWidget
 from widgets.createConfigDockWidget import CreateConfigDockWidget
+from widgets.base import BaseDockWidget as BaseDockWidget
 from widgets.base import IconMixin
 from widgets.help import HelpView
 from services import folderManager as ss_folderManager
@@ -50,7 +51,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
     _instance = None
 
     def __init__(self, themeName=None, themeColor=None, config=None, parent=None):
-        """
+        """Creates the main ui layout for the app
 
         Args:
             config (Config):
@@ -67,7 +68,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self.setObjectName("{}_mainWindow".format(APPNAAME))
-        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowIcon(QtGui.QIcon(QtCore.QDir(os.path.join(APP_ICONPATH, "switch.ico")).absolutePath()))
 
         self.themeName = themeName if themeName is not None else "core"
@@ -89,10 +89,15 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.createConfig = self.fileMenu.addAction(self._fetchIcon("iconmonstr-plus-1-240"), "Create / Update Schema Config")
         self.createConfig.triggered.connect(self._createConfigUI)
         self.fileMenu.addSeparator()
+        
         self.recentMenu = QtWidgets.QMenu("Recent Configs: ", self)
         self.fileMenu.addMenu(self.recentMenu)
+
         self.recentFilesMenu = QtWidgets.QMenu("Recent Files: ", self)
         self.fileMenu.addMenu(self.recentFilesMenu)
+
+        self.addFileBrowser = self.fileMenu.addAction("Custom Browser")
+        self.addFileBrowser.triggered.connect(self._addCustomBrowser)
 
         self.themeMenu = QtWidgets.QMenu("Theme", self)
         self.mainMenuBar.addMenu(self.themeMenu)
@@ -135,6 +140,25 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.resize(600, 800)
         self._instance = self
+    
+    def _addCustomBrowser(self):
+        dir = QtWidgets.QFileDialog.getExistingDirectory(None, "Open Directory", "F:\\", QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks)
+        self._customBrowserDockWidget = BaseDockWidget(themeName=self.themeName, themeColor=self.themeColor)
+        self._customBrowserWidget = suiw_systemBrowser.CustomFileBrowser(rootDir=dir, themeName=self.themeName, themeColor=self.themeColor)
+        self._customBrowserDockWidget.setWidget(self._customBrowserWidget)
+        self._customBrowserDockWidget.setWindowIconText(dir)
+        
+        tbWidget = QtWidgets.QWidget()
+        tbLayout = QtWidgets.QHBoxLayout(tbWidget)
+        tbLabelWidget = QtWidgets.QLabel(dir)
+        tbclose = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-crosshair-1-240"), "")
+        tbclose.clicked.connect(self._customBrowserDockWidget.close)
+        tbLayout.addWidget(tbLabelWidget)
+        tbLayout.addStretch(1)
+        tbLayout.addWidget(tbclose)
+
+        self._customBrowserDockWidget.setTitleBarWidget(tbWidget)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self._customBrowserDockWidget)
 
     def _editTheme(self):
         self.editThemeUI = ThemeEditorDockWidget(themeName=self.themeName, themeColor=self.themeColor)
@@ -210,9 +234,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
     def _createConfigUI(self):
         if self.configDockWidget is None:
             self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
-            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
             self.configDockWidget.setFloating(True)
             self.configDockWidget.resize(800, 600)
+            self.themeChanged.connect(self.configDockWidget.setTheme)
+            self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
         else:
             self.configDockWidget.show()
 

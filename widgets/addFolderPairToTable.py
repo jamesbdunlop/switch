@@ -34,6 +34,7 @@ class AddFolderPairToTable(BaseWidget):
         buttonLayout.addWidget(closeButton)
         addFolderLayout.addLayout(buttonLayout)
         self.resize(600, 200)
+        self.setTheme((themeName, themeColor))
 
     def _commit(self):
         """Emits the folderPair signal.

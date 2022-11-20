@@ -27,13 +27,10 @@ class IconMixin:
 
 
 class ThemeMixin:
-    themeChanged = QtCore.Signal(bool, name="themeChanged")
-
     def __init__(self, themeName, themeColor):
         self.themeName = themeName
         self.themeColor = themeColor
         self.sheet = None
-        self.setTheme([themeName, themeColor])
 
     def setTheme(self, theme):
         """
@@ -42,21 +39,18 @@ class ThemeMixin:
             theme (list[themeName, themeColor]):
         """
         themeName, themeColor = theme
+        logger.info("themeName: %s", themeName)
+        logger.info("themeColor: %s", themeColor)
         self.sheet = st_factory.getThemeData(themeName, themeColor)
         self.themeName = themeName
         self.themeColor = themeColor
-        self.themeChanged.emit(True)
+        self.setStyleSheet(self.sheet)
 
 
 class BaseWidget(QtWidgets.QWidget, IconMixin, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
         QtWidgets.QWidget.__init__(self, parent=parent)
         ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
-        self.themeChanged.connect(self._updateSytleSheet)
-        self.setTheme([themeName, themeColor])
-
-    def _updateSytleSheet(self):
-        self.setStyleSheet(self.sheet)
 
 
 class BaseTreeViewWidget(QtWidgets.QTreeView, IconMixin, ThemeMixin):
@@ -69,4 +63,3 @@ class BaseDockWidget(QtWidgets.QDockWidget, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
         QtWidgets.QDockWidget.__init__(self, parent=parent)
         ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
-        self.setTheme([themeName, themeColor])
