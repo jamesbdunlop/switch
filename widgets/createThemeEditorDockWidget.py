@@ -1,5 +1,5 @@
 import logging, sys
-from PySide2 import QtWidgets, QtCore
+from PySide2 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseWidget as BaseWidget
 from widgets.base import BaseDockWidget as BaseDockWidget
 from themes import factory as t_factory
@@ -16,8 +16,9 @@ class ThemeEditorDockWidget(BaseDockWidget):
         super(ThemeEditorDockWidget, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Edit Theme:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setStyleSheet(self.sheet)
+        self.setTheme((themeName, themeColor))
         self.widget = BaseWidget(themeName=themeName, themeColor=themeColor)
+        self.widget.setTheme((themeName, themeColor))
         self.mainLayout = QtWidgets.QVBoxLayout(self.widget)
 
         data = t_factory.fromJSON(self.themeName, self.themeColor)
@@ -26,9 +27,19 @@ class ThemeEditorDockWidget(BaseDockWidget):
             subLayout = QtWidgets.QHBoxLayout()
 
             label = QtWidgets.QLabel(entry)
+            if entry == "fontFamily":
+                input = QtWidgets.QComboBox()
+                for f in QtGui.QFontDatabase().families():
+                    input.addItem(f)
+                
+                for f in QtGui.QFontDatabase().families():
+                    if f == value:
+                        input.setCurrentText(f)
+                        break
 
-            input = QtWidgets.QLineEdit()
-            input.setText(value)
+            else:
+                input = QtWidgets.QLineEdit()
+                input.setText(value)
 
             subLayout.addWidget(label)
             subLayout.addWidget(input)
@@ -50,13 +61,19 @@ class ThemeEditorDockWidget(BaseDockWidget):
 
         self.mainLayout.addStretch(1)
 
+
     def _saveConfig(self):
         data = {}
         for k, v in self._data.items():
-            data[k] = v.text()
+            if k == "fontFamily":
+                data[k] = v.currentText()
+            else:
+                data[k] = v.text()
 
         t_factory.toJSON(data, self.themeName, self.themeColor)
         self.themeChanged.emit(True)
+        self.setTheme((self.themeName, self.themeColor))
+        self.widget.setTheme((self.themeName, self.themeColor))
 
 
 if __name__ == "__main__":
