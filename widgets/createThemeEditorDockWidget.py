@@ -1,4 +1,5 @@
 import logging, sys
+from functools import partial
 from PySide2 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseWidget as BaseWidget
 from widgets.base import BaseDockWidget as BaseDockWidget
@@ -37,13 +38,32 @@ class ThemeEditorDockWidget(BaseDockWidget):
                         input.setCurrentText(f)
                         break
 
+            elif entry.endswith("Size"):
+                input = QtWidgets.QSpinBox()
+                input.setValue(int(value.replace("px", "")))
+
+            elif entry.endswith("Color"):
+                input = QtWidgets.QLineEdit()
+                input.setText(value)
+                
+                colorPicker = QtWidgets.QPushButton("Pick")
+                colorPicker.clicked.connect(partial(self._changeColor, input))
+                subLayout.addWidget(colorPicker)
+            
+            elif entry in ("level00", "level01", "level02", "level03", "level04", "hiLight"):
+                input = QtWidgets.QLineEdit()
+                input.setText(value)
+                
+                colorPicker = QtWidgets.QPushButton("Pick")
+                colorPicker.clicked.connect(partial(self._changeColor, input))
+                subLayout.addWidget(colorPicker)
             else:
                 input = QtWidgets.QLineEdit()
                 input.setText(value)
 
             subLayout.addWidget(label)
             subLayout.addWidget(input)
-            self.mainLayout.addLayout(subLayout)
+            self.mainLayout.addLayout(subLayout) 
             self._data[entry] = input
 
         self.saveConfigButton = QtWidgets.QPushButton("Save")
@@ -61,12 +81,21 @@ class ThemeEditorDockWidget(BaseDockWidget):
 
         self.mainLayout.addStretch(1)
 
+    def _changeColor(self, input):
+        self.w = QtWidgets.QColorDialog()
+        self.w.setCurrentColor(input.text())
+        self.w.exec_()
+        input.setText(str(self.w.currentColor().name()))
+
+        print("Widget: %s", input)
 
     def _saveConfig(self):
         data = {}
         for k, v in self._data.items():
             if k == "fontFamily":
                 data[k] = v.currentText()
+            elif k.endswith("Size"):
+                data[k] = "{}px".format(v.value())
             else:
                 data[k] = v.text()
 
