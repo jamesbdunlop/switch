@@ -3,11 +3,13 @@ import logging
 import shutil
 from PySide2 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseTreeViewWidget
+from services import archiveManager as ss_archiveManager
 from functools import partial
 
 insideMaya = False
 try:
     from maya import cmds as cmds
+
     insideMaya = True
 except ImportError:
     pass
@@ -29,13 +31,17 @@ class Proxy(QtCore.QSortFilterProxyModel):
         # ['15/07/2022', '1:16', 'AM']
         if left_tokens[-1] in ("AM", "PM"):
             date_tokens = left_tokens[0].split("/")
-            date = QtCore.QDate(int(date_tokens[-1]), int(date_tokens[1]), int(date_tokens[0]))
+            date = QtCore.QDate(
+                int(date_tokens[-1]), int(date_tokens[1]), int(date_tokens[0])
+            )
             time_tokens = left_tokens[1].split(":")
             time = QtCore.QTime(int(time_tokens[0]), int(time_tokens[1]), 0)
             dtLeft = QtCore.QDateTime(date, time)
 
             rdate_tokens = right_tokens[0].split("/")
-            rdate = QtCore.QDate(int(rdate_tokens[-1]), int(rdate_tokens[1]), int(rdate_tokens[0]))
+            rdate = QtCore.QDate(
+                int(rdate_tokens[-1]), int(rdate_tokens[1]), int(rdate_tokens[0])
+            )
             rtime_tokens = right_tokens[1].split(":")
             rtime = QtCore.QTime(int(rtime_tokens[0]), int(rtime_tokens[1]), 0)
             dtRight = QtCore.QDateTime(rdate, rtime)
@@ -48,8 +54,12 @@ class SystemFileBrowser(BaseTreeViewWidget):
     fileOpened = QtCore.Signal(str, name="fileOpened")
 
     def __init__(self, config, themeName, themeColor, parent=None):
-        super(SystemFileBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        super(SystemFileBrowser, self).__init__(
+            themeName=themeName, themeColor=themeColor, parent=parent
+        )
+        self._settings = QtCore.QSettings("JBD", "switch_settings")
         self.config = config
+        self.archiveFolderPath = None
         self._dir = QtCore.QDir()
         self._model = QtWidgets.QFileSystemModel()
         self.setSortingEnabled(True)
@@ -69,7 +79,9 @@ class SystemFileBrowser(BaseTreeViewWidget):
 
         # Fix the darn resize issues with the filebrowser
         for colIDX in range(self._proxyModel.sourceModel().columnCount()):
-            self.header(). setSectionResizeMode(colIDX, QtWidgets.QHeaderView.ResizeToContents)
+            self.header().setSectionResizeMode(
+                colIDX, QtWidgets.QHeaderView.ResizeToContents
+            )
 
         # Right click
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -102,10 +114,14 @@ class SystemFileBrowser(BaseTreeViewWidget):
         """
         if not os.path.exists(self._dir.path()):
             logger.warning("Root path does not exist!")
-            confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Create?!",
-                                            "Root project path doest not exist! Create it now?",
-                                            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None,
-                                            QtCore.Qt.WindowStaysOnTopHint)
+            confirm = QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning,
+                "Create?!",
+                "Root project path doest not exist! Create it now?",
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                None,
+                QtCore.Qt.WindowStaysOnTopHint,
+            )
             confirm.setStyleSheet(self.sheet)
             if confirm.exec_() == QtWidgets.QMessageBox.Ok:
                 self._dir.mkpath(rootPath)
@@ -123,24 +139,42 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self.menu.setWindowTitle("rcMenu")
         self.menu.setStyleSheet(self.sheet)
         if self._isDirectory():
-            rootAction = self.menu.addAction(self._fetchIcon("iconmonstr-menu-4-240"), "Set As Root")
+            rootAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-menu-4-240"), "Set As Root"
+            )
             rootAction.triggered.connect(self._changeRootToSelected)
 
-            openParentFolderAction = self.menu.addAction(self._fetchIcon("iconmonstr-login-icon-256"), "Open Parent Folder")
+            openParentFolderAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-login-icon-256"), "Open Parent Folder"
+            )
             openParentFolderAction.triggered.connect(self._openParentFolder)
 
+            archiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive Folder")
+            archiveAction.triggered.connect(
+                partial(self._archiveSelected, asFolder=True)
+            )
+
         if self._isValidFile():
-            openAction = self.menu.addAction(self._fetchIcon("iconmonstr-shipping-box-10-icon-256"), "Open File")
+            openAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-shipping-box-10-icon-256"), "Open File"
+            )
             openAction.triggered.connect(partial(self._open, asFolder=False))
 
             if insideMaya:
-                importAction = self.menu.addAction(self._fetchIcon("iconmonstr-upload-6-icon-256Yellow"), "Import File")
+                importAction = self.menu.addAction(
+                    self._fetchIcon("iconmonstr-upload-6-icon-256Yellow"), "Import File"
+                )
                 importAction.triggered.connect(self._importSelected)
 
-        openCurrentFolderAction = self.menu.addAction(self._fetchIcon("iconmonstr-shipping-box-10-icon-256"), "Explore to folder...")
+        openCurrentFolderAction = self.menu.addAction(
+            self._fetchIcon("iconmonstr-shipping-box-10-icon-256"),
+            "Explore to folder...",
+        )
         openCurrentFolderAction.triggered.connect(partial(self._open, asFolder=True))
 
-        deleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-x-mark-5-240"), "DELETE")
+        deleteAction = self.menu.addAction(
+            self._fetchIcon("iconmonstr-trash-can-5-240"), "DELETE"
+        )
         deleteAction.triggered.connect(self._deleteSelected)
 
         self.menu.move(self.mapToGlobal(point))
@@ -161,7 +195,9 @@ class SystemFileBrowser(BaseTreeViewWidget):
             path = self.model().filePath(srcIdx)
 
         if " " in path:
-            logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
+            logger.warning(
+                "There are spaces in the path, remove the spaces if you wish to open this file!."
+            )
             return
 
         parentPath = "/".join(path.split("/")[:-1])
@@ -178,7 +214,9 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 path = self.model().filePath(srcIdx)
 
         if " " in path:
-            logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
+            logger.warning(
+                "There are spaces in the path, remove the spaces if you wish to open this file!."
+            )
             return
 
         if asFolder:
@@ -253,13 +291,23 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 self.collapse(child)
 
     def _deleteSelected(self):
-        confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!", "Are you sure?", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None, QtCore.Qt.WindowStaysOnTopHint)
+        confirm = QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Warning,
+            "Delete?!",
+            "Are you sure?",
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            None,
+            QtCore.Qt.WindowStaysOnTopHint,
+        )
         confirm.setStyleSheet(self.sheet)
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             return
         rowIndices = self.selectedIndexes()
         for row in rowIndices:
             srcIdx = self._proxyModel.mapToSource(row)
+            if srcIdx.column() != 0:
+                continue
+
             path = self.model().filePath(srcIdx)
             if os.path.isfile(path):
                 os.remove(path)
@@ -267,6 +315,63 @@ class SystemFileBrowser(BaseTreeViewWidget):
             elif os.path.isdir(path):
                 shutil.rmtree(path)
                 logger.debug("Successfully removed directory!")
+
+    def _archiveSelected(self, asFolder=False):
+        # Warn user first
+        confirm = QtWidgets.QMessageBox(
+                                        QtWidgets.QMessageBox.Warning,
+                                        "Archive And Delete?!",
+                                        "Using this action will zip and delete the selected folders.",
+                                        QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                                        None,
+                                        QtCore.Qt.WindowStaysOnTopHint,
+                                    )
+        confirm.setStyleSheet(self.sheet)
+        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+            return
+
+        # Check for previously archived to path. Prompt user to use this or not.
+        usePrevious = False
+        if self.archiveFolderPath is not None:
+            confirm2 = QtWidgets.QMessageBox(
+                                            QtWidgets.QMessageBox.Warning,
+                                            "Use Previous Archive Folder?",
+                                            "Archive to: {}".format(self.archiveFolderPath),
+                                            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+                                            None,
+                                            QtCore.Qt.WindowStaysOnTopHint,
+                                        )
+            confirm2.setStyleSheet(self.sheet)
+            if confirm2.exec_() == QtWidgets.QMessageBox.Ok:
+                usePrevious = True
+
+        if not usePrevious:
+            dir = QtWidgets.QFileDialog.getExistingDirectory(
+                None,
+                "Open Directory",
+                "",
+                QtWidgets.QFileDialog.ShowDirsOnly
+                | QtWidgets.QFileDialog.DontResolveSymlinks,
+            )
+            if not dir:
+                return
+            self.archiveFolderPath = dir
+        else:
+            dir = self.archiveFolderPath
+        
+        rowIndices = self.selectedIndexes()
+        for row in rowIndices:
+            srcIdx = self._proxyModel.mapToSource(row)
+            if srcIdx.column() != 0:
+                continue
+            path = self.model().filePath(srcIdx)
+            if os.path.isdir(path):
+                zippath = "{}\\{}_{}_{}_{}.zip".format(
+                    dir, path.split("/")[-4], path.split("/")[-3], path.split("/")[-2], path.split("/")[-1]
+                )
+                logger.info("Archiving and cleaning: %s to %s", path, zippath)
+                ss_archiveManager.archiveFolder(inDirPath=path, outFilePath=zippath)
+                shutil.rmtree(path)
 
     def dragMoveEvent(self, event) -> None:
         super(SystemFileBrowser, self).dragMoveEvent(event)
@@ -319,10 +424,14 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self._dir.setPath(path)
         self._dir.makeAbsolute()
         if not os.path.isdir(self._dir.path()):
-            confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Create?!",
-                                            "This root path doest not exist! Create it now?",
-                                            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None,
-                                            QtCore.Qt.WindowStaysOnTopHint)
+            confirm = QtWidgets.QMessageBox(
+                QtWidgets.QMessageBox.Warning,
+                "Create?!",
+                "This root path doest not exist! Create it now?",
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+                None,
+                QtCore.Qt.WindowStaysOnTopHint,
+            )
             confirm.setStyleSheet(self.sheet)
             if confirm.exec_() == QtWidgets.QMessageBox.Ok:
                 self._dir.mkpath(self._dir.path())
@@ -376,10 +485,24 @@ class SystemFileBrowser(BaseTreeViewWidget):
         self.config = config
         self.updateModelPath()
 
+    def closeEvent(self, e):
+        self._settings.beginGroup("sysBrowserWindow")
+        self._settings.setValue("archiveFolderPath", self.archiveFolderPath)
+        self._settings.endGroup()
+        super(SystemFileBrowser, self).closeEvent(e)
+
+    def show(self, setOnTop=False):
+        super(SystemFileBrowser, self).show()
+        self._settings.beginGroup("sysBrowserWindow")
+        self.archiveFolderPath = self._settings.value("archiveFolderPath", defaultValue="")
+        self._settings.endGroup()
+
 
 class CustomFileBrowser(BaseTreeViewWidget):
     def __init__(self, rootDir, themeName, themeColor, parent=None):
-        super(CustomFileBrowser, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        super(CustomFileBrowser, self).__init__(
+            themeName=themeName, themeColor=themeColor, parent=parent
+        )
         self._dir = QtCore.QDir()
         self._model = QtWidgets.QFileSystemModel()
         self.setSortingEnabled(True)
@@ -398,7 +521,9 @@ class CustomFileBrowser(BaseTreeViewWidget):
 
         # Fix the darn resize issues with the filebrowser
         for colIDX in range(self._proxyModel.sourceModel().columnCount()):
-            self.header(). setSectionResizeMode(colIDX, QtWidgets.QHeaderView.ResizeToContents)
+            self.header().setSectionResizeMode(
+                colIDX, QtWidgets.QHeaderView.ResizeToContents
+            )
 
         self._dir.setPath(rootDir)
         self._dir.makeAbsolute()
@@ -416,8 +541,13 @@ class CustomFileBrowser(BaseTreeViewWidget):
         self.menu.setWindowTitle("rcMenu")
         self.menu.setStyleSheet(self.sheet)
 
-        deleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-x-mark-5-240"), "DELETE")
+        deleteAction = self.menu.addAction(
+            self._fetchIcon("iconmonstr-trash-can-5-240"), "DELETE"
+        )
         deleteAction.triggered.connect(self._deleteSelected)
+
+        restoreArchiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"),"Restore Archive")
+        restoreArchiveAction.triggered.connect(self._restoreArchive)
 
         self.menu.move(self.mapToGlobal(point))
         self.menu.show()
@@ -432,16 +562,14 @@ class CustomFileBrowser(BaseTreeViewWidget):
                 path = self.model().filePath(srcIdx)
 
         if " " in path:
-            logger.warning("There are spaces in the path, remove the spaces if you wish to open this file!.")
+            logger.warning(
+                "There are spaces in the path, remove the spaces if you wish to open this file!."
+            )
             return
 
-        if asFolder:
-            if not os.path.isdir(path):
-                path = os.path.dirname(path)
-            logger.debug("System: opening %s", path)
-            service = QtGui.QDesktopServices()
-            service.openUrl(QtCore.QUrl(path))
-            return
+        logger.debug("System: opening %s", path)
+        service = QtGui.QDesktopServices()
+        service.openUrl(QtCore.QUrl(path))
 
     def _isValidFile(self, path=None):
         if path is None:
@@ -455,14 +583,61 @@ class CustomFileBrowser(BaseTreeViewWidget):
 
         return os.path.isfile(path)
 
-    def _deleteSelected(self):
-        confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!", "Are you sure?", QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None, QtCore.Qt.WindowStaysOnTopHint)
+    def _restoreArchive(self):
+        confirm = QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Warning,
+            "Restore Archive?!",
+            "Are you sure?",
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            None,
+            QtCore.Qt.WindowStaysOnTopHint,
+        )
         confirm.setStyleSheet(self.sheet)
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             return
+
+        rootDir = QtWidgets.QFileDialog.getExistingDirectory(
+            None,
+            "Root Directory",
+            "",
+            QtWidgets.QFileDialog.ShowDirsOnly
+            | QtWidgets.QFileDialog.DontResolveSymlinks,
+        )
+        if not dir:
+            rootDir
+
         rowIndices = self.selectedIndexes()
         for row in rowIndices:
             srcIdx = self._proxyModel.mapToSource(row)
+            if srcIdx.column() != 0:
+                continue
+            
+            path = self.model().filePath(srcIdx)
+            if os.path.isfile(path) and path.endswith(".zip"):
+                logger.info("Restoring archive: %s", path)
+                ss_archiveManager.restoreFile(path, rootDir)
+            else:
+                logger.info("Can not restore: %s not a valid .zip archive!", path)
+
+    def _deleteSelected(self):
+        confirm = QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Warning,
+            "Delete?!",
+            "Are you sure?",
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            None,
+            QtCore.Qt.WindowStaysOnTopHint,
+        )
+        confirm.setStyleSheet(self.sheet)
+        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+            return
+
+        rowIndices = self.selectedIndexes()
+        for row in rowIndices:
+            srcIdx = self._proxyModel.mapToSource(row)
+            if srcIdx.column() != 0:
+                continue
+
             path = self.model().filePath(srcIdx)
             if os.path.isfile(path):
                 os.remove(path)
@@ -484,7 +659,7 @@ class CustomFileBrowser(BaseTreeViewWidget):
         logger.debug("path: %s", path)
         if not path:
             path = self._dir.path()
-        
+
         if os.path.isdir(path):
             return event.accept()
 
@@ -531,7 +706,6 @@ class CustomFileBrowser(BaseTreeViewWidget):
         if self._isValidFile(path):
             logger.debug("Opening %s", path)
             self._open(path)
-            self.fileOpened.emit(path)
 
     def mousePressEvent(self, e):
         """Overload the mousePressEvent for keyboard mods"""

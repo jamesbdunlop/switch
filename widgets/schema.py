@@ -62,7 +62,9 @@ class SchemaWidget(BaseWidget):
             themeColor (string):
             parent QtWidget:
         """
-        BaseWidget.__init__(self, themeName=themeName, themeColor=themeColor, parent=parent)
+        BaseWidget.__init__(
+            self, themeName=themeName, themeColor=themeColor, parent=parent
+        )
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self._name = name
 
@@ -87,11 +89,15 @@ class SchemaWidget(BaseWidget):
 
         # Additonal buttons..
         buttonLayout = QtWidgets.QHBoxLayout()
-        addButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-plus-1-240"), "Add")
+        addButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-plus-1-240"), "Add"
+        )
         addButton.clicked.connect(self._addFolderPairToTableUI)
         addButton.setToolTip("Add folder to schema.")
 
-        removeButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-minus-4-240"), "Rem")
+        removeButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-minus-4-240"), "Rem"
+        )
         removeButton.clicked.connect(self._removeRows)
         removeButton.setToolTip("Remove selected rows from schema.")
 
@@ -100,7 +106,9 @@ class SchemaWidget(BaseWidget):
 
         toIgnoreForCheckable = ("ROOTS", "BASEFOLDERS")
         if name not in toIgnoreForCheckable:
-            closeButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-x-mark-4-240"), "")
+            closeButton = QtWidgets.QPushButton(
+                self._fetchIcon("iconmonstr-x-mark-4-240"), ""
+            )
             closeButton.clicked.connect(partial(self._close, widget=self.gbWidget))
             closeButton.setMaximumWidth(32)
             closeButton.setToolTip("Remove this schema entirely.")
@@ -154,18 +162,16 @@ class SchemaWidget(BaseWidget):
         selected[0].setText(name)
 
     def _rename(self, name):
-        """Renames the schema widget and sets the groupBox title
-        """
+        """Renames the schema widget and sets the groupBox title"""
         self._name = name
         self.gbWidget.setTitle(self._name)
 
     def _removeRows(self):
-        """Removes the selected rows
-        """
+        """Removes the selected rows"""
         selected = self.table().selectedItems()
         start = selected[0].row()
         end = selected[-1].row()
-        for x in range((end-start)+1):
+        for x in range((end - start) + 1):
             self.table().removeRow(end)
             end -= 1
 
@@ -177,10 +183,14 @@ class SchemaWidget(BaseWidget):
         """
         folderName, subFolderName = data
 
-        qtwiFolderName = QtWidgets.QTableWidgetItem(text=folderName, type=QtCore.Qt.DisplayRole)
+        qtwiFolderName = QtWidgets.QTableWidgetItem(
+            text=folderName, type=QtCore.Qt.DisplayRole
+        )
         qtwiFolderName.setData(QtCore.Qt.DisplayRole, folderName)
 
-        qtwiSubFolderName = QtWidgets.QTableWidgetItem(text=subFolderName, type=QtCore.Qt.DisplayRole)
+        qtwiSubFolderName = QtWidgets.QTableWidgetItem(
+            text=subFolderName, type=QtCore.Qt.DisplayRole
+        )
         qtwiSubFolderName.setData(QtCore.Qt.DisplayRole, subFolderName)
 
         # Set basic row count to see stuff..
@@ -188,7 +198,7 @@ class SchemaWidget(BaseWidget):
         if count == 0:
             self.table().setRowCount(1)
         else:
-            self.table().setRowCount(count+1)
+            self.table().setRowCount(count + 1)
 
         emptyRow = 0
         for i in range(self.table().rowCount()):
@@ -215,10 +225,14 @@ class SchemaWidget(BaseWidget):
         Args:
             widget (QGroupBox): the QGroupBox widget.
         """
-        confirm = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Delete?!",
-                                        "Delete this folder schema?",
-                                        QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel, None,
-                                        QtCore.Qt.WindowStaysOnTopHint)
+        confirm = QtWidgets.QMessageBox(
+            QtWidgets.QMessageBox.Warning,
+            "Delete?!",
+            "Delete this folder schema?",
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            None,
+            QtCore.Qt.WindowStaysOnTopHint,
+        )
         confirm.setStyleSheet(self.sheet)
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             widget.setChecked(False)

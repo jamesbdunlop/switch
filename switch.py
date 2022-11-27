@@ -7,19 +7,21 @@ from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
 from widgets import systemFileBrowser as suiw_systemBrowser
 from widgets import configBrowser as suiw_configBrowser
-from widgets.createFolderDockWidget import CreateFolderDockWidget
-from widgets.createConfigDockWidget import CreateConfigDockWidget
+from widgets.folderDockWidget import FolderDockWidget
+from widgets.configDockWidget import ConfigDockWidget
 from widgets.base import BaseDockWidget as BaseDockWidget
 from widgets.base import IconMixin
 from widgets.help import HelpView
 from services import folderManager as ss_folderManager
 from services import configManger as ss_configManager
-from widgets.createThemeEditorDockWidget import ThemeEditorDockWidget
+from widgets.themeEditorDockWidget import ThemeEditorDockWidget
+from widgets.customBrowserDockWidget import CustomBrowserDockWidget
 
 insideMaya = False
 try:
     from maya import cmds as cmds
     from maya.app.general import mayaMixin as mag_mayaMixin
+
     insideMaya = True
 except ImportError:
     pass
@@ -32,15 +34,15 @@ VERS = "0.1.4"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
-DOCKTILE = '{} v{}'.format(APPNAAME, VERS)
+DOCKTILE = "{} v{}".format(APPNAAME, VERS)
 
 # TODO: Work out the instancing for the final app, so it doesn't keep opening new instances of.
 # TODO: Workspace isn't switching in maya when setting root.
 
-frozen = getattr(sys, 'frozen', '')
+frozen = getattr(sys, "frozen", "")
 if not frozen:
     APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
-elif frozen in ('dll', 'console_exe', 'windows_exe'):
+elif frozen in ("dll", "console_exe", "windows_exe"):
     # py2exe:
     APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
 
@@ -61,14 +63,25 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._settings = QtCore.QSettings("JBD", "{}_settings".format(APPNAAME))
         self._recentConfigs = list()
         self._recentFilepaths = list()
+        self._recentCustomBrowserPaths = list()
+        self._customBrowserDockWidgets = list()
+        
         self.config = config
-        self.configPath = os.path.join(self.config.projectPath(), self.config.projectName()) if self.config else "No config found"
+        self.configPath = (
+            os.path.join(self.config.projectPath(), self.config.projectName())
+            if self.config
+            else "No config found"
+        )
         self.dw = None
         self.configDockWidget = None
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self.setObjectName("{}_mainWindow".format(APPNAAME))
-        self.setWindowIcon(QtGui.QIcon(QtCore.QDir(os.path.join(APP_ICONPATH, "switch.ico")).absolutePath()))
+        self.setWindowIcon(
+            QtGui.QIcon(
+                QtCore.QDir(os.path.join(APP_ICONPATH, "switch.ico")).absolutePath()
+            )
+        )
 
         self.themeName = themeName if themeName is not None else "core"
         self.themeColor = themeColor if themeColor is not None else ""
@@ -83,13 +96,17 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.mainMenuBar.addMenu(self.fileMenu)
 
         # Menu Options
-        self.loadConfig = self.fileMenu.addAction(self._fetchIcon("iconmonstr-login-icon-256"), "Load Project")
+        self.loadConfig = self.fileMenu.addAction(
+            self._fetchIcon("iconmonstr-login-icon-256"), "Load Project"
+        )
         self.loadConfig.triggered.connect(self._loadConfig)
 
-        self.createConfig = self.fileMenu.addAction(self._fetchIcon("iconmonstr-plus-1-240"), "Create / Update Schema Config")
+        self.createConfig = self.fileMenu.addAction(
+            self._fetchIcon("iconmonstr-plus-1-240"), "Create / Update Schema Config"
+        )
         self.createConfig.triggered.connect(self._createConfigUI)
         self.fileMenu.addSeparator()
-        
+
         self.recentMenu = QtWidgets.QMenu("Recent Configs: ", self)
         self.fileMenu.addMenu(self.recentMenu)
 
@@ -130,7 +147,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.centerW = QtWidgets.QWidget()
         layout = QtWidgets.QVBoxLayout(self.centerW)
-        self._browserWidget = suiw_systemBrowser.SystemFileBrowser(config=self.config, themeName=self.themeName, themeColor=self.themeColor)
+        self._browserWidget = suiw_systemBrowser.SystemFileBrowser(
+            config=self.config, themeName=self.themeName, themeColor=self.themeColor
+        )
         layout.addWidget(self._browserWidget)
         self._browserWidget.fileOpened.connect(self._updateRecentFilesMenu)
 
@@ -140,28 +159,45 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.resize(600, 800)
         self._instance = self
-    
-    def _addCustomBrowser(self):
-        dir = QtWidgets.QFileDialog.getExistingDirectory(None, "Open Directory", "F:\\", QtWidgets.QFileDialog.ShowDirsOnly | QtWidgets.QFileDialog.DontResolveSymlinks)
-        self._customBrowserDockWidget = BaseDockWidget(themeName=self.themeName, themeColor=self.themeColor)
-        self._customBrowserWidget = suiw_systemBrowser.CustomFileBrowser(rootDir=dir, themeName=self.themeName, themeColor=self.themeColor)
-        self._customBrowserDockWidget.setWidget(self._customBrowserWidget)
-        self._customBrowserDockWidget.setWindowIconText(dir)
-        
-        tbWidget = QtWidgets.QWidget()
-        tbLayout = QtWidgets.QHBoxLayout(tbWidget)
-        tbLabelWidget = QtWidgets.QLabel(dir)
-        tbclose = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-crosshair-1-240"), "")
-        tbclose.clicked.connect(self._customBrowserDockWidget.close)
-        tbLayout.addWidget(tbLabelWidget)
-        tbLayout.addStretch(1)
-        tbLayout.addWidget(tbclose)
 
-        self._customBrowserDockWidget.setTitleBarWidget(tbWidget)
-        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self._customBrowserDockWidget)
+    def _customBrowserWidgetExists(self, directoryPath):
+        for widget in self._customBrowserDockWidgets:
+            if widget.getDir() == directoryPath:
+                return True
+        return False
+    
+    def _customDockWidgetRemoved(self, dirPath):
+        for widget in self._customBrowserDockWidgets:
+            if widget.getDir() == dirPath:
+                self._recentCustomBrowserPaths.remove(widget.getDir())
+                self._customBrowserDockWidgets.remove(widget)
+
+    def _addCustomBrowser(self, sender=None, dir=None):
+        if dir is None:
+            dir = QtWidgets.QFileDialog.getExistingDirectory(
+                None,
+                "Open Directory",
+                "F:\\",
+                QtWidgets.QFileDialog.ShowDirsOnly
+                | QtWidgets.QFileDialog.DontResolveSymlinks,
+            )
+            if not dir:
+                return
+
+        if self._customBrowserWidgetExists(dir):
+            return
+
+        customBrowserWidget = CustomBrowserDockWidget(themeName=self.themeName, themeColor=self.themeColor, dir=dir)
+        customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, customBrowserWidget)
+        self._customBrowserDockWidgets.append(customBrowserWidget)
+        if dir not in self._recentCustomBrowserPaths:
+            self._recentCustomBrowserPaths.append(dir)
 
     def _editTheme(self):
-        self.editThemeUI = ThemeEditorDockWidget(themeName=self.themeName, themeColor=self.themeColor)
+        self.editThemeUI = ThemeEditorDockWidget(
+            themeName=self.themeName, themeColor=self.themeColor
+        )
         self.editThemeUI.themeChanged.connect(self._themeEdited)
         self.editThemeUI.show()
 
@@ -173,7 +209,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         for recentName in self._recentFilepaths[:10]:
             if not os.path.isfile(recentName):
                 self._recentFilepaths.remove(recentName)
-                logger.debug("Removed %s from recents as it no longer exists on disk.", recentName)
+                logger.debug(
+                    "Removed %s from recents as it no longer exists on disk.",
+                    recentName,
+                )
                 continue
 
             act = self.recentFilesMenu.addAction(recentName)
@@ -203,20 +242,23 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         # Clear removes the create folders button so lets recreate that here instead..
         spacer = QtWidgets.QWidget()
-        spacer.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding)
+        spacer.setSizePolicy(
+            QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.MinimumExpanding
+        )
         self.toolbar.addWidget(spacer)
 
-        createFoldersButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-add-folder-icon-256"), "CreateFolders")
+        createFoldersButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-add-folder-icon-256"), "CreateFolders"
+        )
         createFoldersButton.clicked.connect(self.createFolderUI)
         self.toolbar.addWidget(createFoldersButton)
 
     def _toggleOnTop(self, sender):
         if sender:
             self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-            self.show()
         else:
             self.setWindowFlags(QtCore.Qt.Window)
-            self.show()
+        self.show(True)
 
     def _openFile(self, filepath):
         """Passes filepath along to the systemBrowser's file open.
@@ -227,13 +269,17 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._browserWidget._open(path=filepath, asFolder=False)
 
     def _loadConfig(self):
-        self.configBrowser = suiw_configBrowser.ConfigBrowser(self.themeName, self.themeColor)
+        self.configBrowser = suiw_configBrowser.ConfigBrowser(
+            self.themeName, self.themeColor
+        )
         self.configBrowser.show()
         self.configBrowser.fileSelected.connect(self.setConfig)
 
     def _createConfigUI(self):
         if self.configDockWidget is None:
-            self.configDockWidget = CreateConfigDockWidget(self.themeName, self.themeColor)
+            self.configDockWidget = ConfigDockWidget(
+                self.themeName, self.themeColor
+            )
             self.configDockWidget.setFloating(True)
             self.configDockWidget.resize(800, 600)
             self.themeChanged.connect(self.configDockWidget.setTheme)
@@ -265,13 +311,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         ss_folderManager.createFolders(self.config, assetType, assetName)
 
     def createFolderUI(self):
-        """Show the widget for creating a new folder
-        """
+        """Show the widget for creating a new folder"""
         if self.dw is None:
-            self.dw = CreateFolderDockWidget(self.themeName, self.themeColor, config=self.config)
+            self.dw = FolderDockWidget(
+                self.themeName, self.themeColor, config=self.config
+            )
             self.dw.commit.connect(self._createFolder)
             self.addDockWidget(QtCore.Qt.BottomDockWidgetArea, self.dw)
-            self.dw.resize(300,300)
+            self.dw.resize(300, 300)
             self.resizeDocks([self.dw], [125], QtCore.Qt.Vertical)
         else:
             self.dw.show()
@@ -313,7 +360,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
                 act = self.recentMenu.addAction(filepath)
                 act.triggered.connect(partial(self.setConfig, filepath=filepath))
 
-        self.configPath = self.config.projectPath() if self.config else "No config found"
+        self.configPath = (
+            self.config.projectPath() if self.config else "No config found"
+        )
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
         self._updateToolBarButtons()
 
@@ -335,18 +384,27 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._settings.setValue("recentFilepaths", self._recentFilepaths)
         self._settings.setValue("themeName", self.themeName)
         self._settings.setValue("themeColor", self.themeColor)
+        self._settings.setValue("recentCustomBrowsers", self._recentCustomBrowserPaths)
 
         if self.config is not None:
             self._settings.setValue("lastOpened", self.config.configPath())
 
         self._settings.endGroup()
+        # Force the show for the browsers settings to save
+        self._browserWidget.close()
         super(Switch, self).closeEvent(e)
 
-    def show(self):
+    def show(self, setOnTop=False):
         super(Switch, self).show()
+        if setOnTop:
+            return
         logger.debug("Applying windows settings now...")
         self._settings.beginGroup("mainWindow")
 
+        self._recentCustomBrowserPaths = list(set(self._settings.value("recentCustomBrowsers", defaultValue=[])))
+        for customBrowserPath in self._recentCustomBrowserPaths:
+            self._addCustomBrowser(dir=customBrowserPath)
+            
         # See Window Geometry for a discussion on why it is better to call QWidget::resize() and QWidget::move() rather
         # than QWidget::setGeometry() to restore a window's geometry.
         self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
@@ -357,18 +415,25 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         for recentName in self._recentConfigs:
             if not os.path.isfile(recentName):
                 self._recentConfigs.remove(recentName)
-                logger.debug("Removed %s from recents as it no longer exists on disk.", recentName)
+                logger.debug(
+                    "Removed %s from recents as it no longer exists on disk.",
+                    recentName,
+                )
                 continue
 
             act = self.recentMenu.addAction(recentName)
             act.triggered.connect(partial(self.setConfig, filepath=recentName))
 
-        self._recentFilepaths = self._settings.value("recentFilepaths", defaultValue=list())
+        self._recentFilepaths = self._settings.value(
+            "recentFilepaths", defaultValue=list()
+        )
         logger.debug("Restoring recentConfigs: %s", self._recentConfigs)
         self._updateRecentFilesMenu()
-
+    
         self.fileMenu.addSeparator()
-        self.exitApp = self.fileMenu.addAction(self._fetchIcon("iconmonstr-x-mark-4-icon-256"), "Exit")
+        self.exitApp = self.fileMenu.addAction(
+            self._fetchIcon("iconmonstr-x-mark-4-icon-256"), "Exit"
+        )
         self.exitApp.triggered.connect(self.close)
 
         # Open the previous active config when the ui was closed.
@@ -385,9 +450,12 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setTheme(themeName, themeColor)
 
         self._settings.endGroup()
+        # Force the show for the browsers settings to fire
+        self._browserWidget.show()
 
 
 if insideMaya:
+
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)
@@ -440,7 +508,11 @@ if __name__ == "__main__":
     lastOpened = _settings.value("lastOpened", defaultValue=None)
     _settings.endGroup()
     qtapp = QtWidgets.QApplication(sys.argv)
-    logger.debug("Starting {} v{} standalone...".format(qtapp.applicationName(), qtapp.applicationVersion()))
+    logger.debug(
+        "Starting {} v{} standalone...".format(
+            qtapp.applicationName(), qtapp.applicationVersion()
+        )
+    )
     qtapp.setQuitOnLastWindowClosed(True)
     qtapp.setApplicationName(APPNAAME)
     qtapp.setApplicationVersion(VERS)

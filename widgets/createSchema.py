@@ -17,7 +17,9 @@ logging.basicConfig()
 
 class CreateSchemaWidget(BaseWidget):
     def __init__(self, themeName, themeColor, parent=None):
-        super(CreateSchemaWidget, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        super(CreateSchemaWidget, self).__init__(
+            themeName=themeName, themeColor=themeColor, parent=parent
+        )
         self.setWindowTitle("Schema Folder Creator")
         self._names = list()
         self._schTableWidgets = list()
@@ -27,13 +29,25 @@ class CreateSchemaWidget(BaseWidget):
         mainPropertiesWidget.setTitle("Project Data:")
         mainPropertiesLayout = QtWidgets.QVBoxLayout(mainPropertiesWidget)
 
-        gridlayout, self._projectNameInput = createLabeledInput("{:18}".format("projectName"), "Type the name of your project here.", toolTip="This is a regular string name with no spaces for your project where\nthe folders will be created.")
+        gridlayout, self._projectNameInput = createLabeledInput(
+            "{:18}".format("projectName"),
+            "Type the name of your project here.",
+            toolTip="This is a regular string name with no spaces for your project where\nthe folders will be created.",
+        )
         mainPropertiesLayout.addLayout(gridlayout)
 
-        gridlayout, self._projectPathInput = createLabeledInput("{:19}".format("projectPath"), "Type the path to your project. eg: E:/3D_Projects/projects", toolTip="Path to the root folder where you want to create projects.")
+        gridlayout, self._projectPathInput = createLabeledInput(
+            "{:19}".format("projectPath"),
+            "Type the path to your project. eg: E:/3D_Projects/projects",
+            toolTip="Path to the root folder where you want to create projects.",
+        )
         mainPropertiesLayout.addLayout(gridlayout)
 
-        gridlayout, self._projectRootName = createLabeledInput("{:16}".format("baseFolderName"), "Type the name of the base folder to make under the project. eg: Character / Props / etc.", toolTip="drive:/projectpath/projectName/baseFolder/schema..")
+        gridlayout, self._projectRootName = createLabeledInput(
+            "{:16}".format("baseFolderName"),
+            "Type the name of the base folder to make under the project. eg: Character / Props / etc.",
+            toolTip="drive:/projectpath/projectName/baseFolder/schema..",
+        )
         mainPropertiesLayout.addLayout(gridlayout)
 
         schemaWidget = QtWidgets.QGroupBox()
@@ -53,20 +67,29 @@ class CreateSchemaWidget(BaseWidget):
         self.schemaLayout.addWidget(self.baseFoldersTableWidget)
 
         buttonLayout = QtWidgets.QHBoxLayout()
-        loadButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-login-icon-256"), "Load Existing Config/Template")
+        loadButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-login-icon-256"),
+            "Load Existing Config/Template",
+        )
         loadButton.clicked.connect(self._loadSchema)
 
-        saveToButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-save-1-240"), "Save Schema")
+        saveToButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-save-1-240"), "Save Schema"
+        )
         saveToButton.clicked.connect(self._saveSchema)
 
         buttonLayout.addWidget(loadButton)
         buttonLayout.addWidget(saveToButton)
 
         buttonLayout2 = QtWidgets.QHBoxLayout()
-        addToButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-plus-1-240"), "Add SubFolder Schema")
+        addToButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-plus-1-240"), "Add SubFolder Schema"
+        )
         addToButton.clicked.connect(self._addFolderLayout)
 
-        previewToButton = QtWidgets.QPushButton(self._fetchIcon("iconmonstr-plus-1-240"), "Preview Schema")
+        previewToButton = QtWidgets.QPushButton(
+            self._fetchIcon("iconmonstr-plus-1-240"), "Preview Schema"
+        )
         previewToButton.clicked.connect(self._createPreview)
         buttonLayout2.addWidget(addToButton)
         buttonLayout2.addWidget(previewToButton)
@@ -82,8 +105,7 @@ class CreateSchemaWidget(BaseWidget):
         return name in self._names
 
     def _addFolderLayout(self):
-        """Pop up a UI to allow a user to input a name for a new subFolder layout
-        """
+        """Pop up a UI to allow a user to input a name for a new subFolder layout"""
         self.ui = AddFolderLayout(self.themeName, self.themeColor)
         self.ui.name.connect(self._createFolderTableSetup)
         self.ui.show()
@@ -167,10 +189,11 @@ class CreateSchemaWidget(BaseWidget):
         return data
 
     def _saveSchema(self):
-        """Parse the wigets and save the data to json
-        """
+        """Parse the wigets and save the data to json"""
         data = self.createConfigData()
-        self.configBrowser = suiw_configBrowser.ConfigBrowser(self.themeName, self.themeColor, toSave=True)
+        self.configBrowser = suiw_configBrowser.ConfigBrowser(
+            self.themeName, self.themeColor, toSave=True
+        )
         self.configBrowser.fileSelected.connect(partial(self._toJSON, data=data))
         self.configBrowser.show()
 
@@ -188,7 +211,9 @@ class CreateSchemaWidget(BaseWidget):
 
         Returns:
         """
-        self.configBrowser = suiw_configBrowser.ConfigBrowser(self.themeName, self.themeColor)
+        self.configBrowser = suiw_configBrowser.ConfigBrowser(
+            self.themeName, self.themeColor
+        )
         self.configBrowser.show()
         self.configBrowser.fileSelected.connect(self._fromJSON)
 
@@ -229,7 +254,9 @@ class CreateSchemaWidget(BaseWidget):
     def _createPreview(self):
         data = self.createConfigData()
         config = ss_configManager.Config(data)
-        self.previewUI = PreviewTreeWidget(themeName="core", themeColor="", config=config, parent=None)
+        self.previewUI = PreviewTreeWidget(
+            themeName="core", themeColor="", config=config, parent=None
+        )
         self.previewUI.show()
 
     def iterSchemaWidgets(self):

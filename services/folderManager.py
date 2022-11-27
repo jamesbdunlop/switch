@@ -53,8 +53,18 @@ def createFolders(config, assetType, assetName):
             The name of the asset
     """
     baseFolderPath = _getBaseFolderPath(config)
-    folderPath = os.path.sep.join([baseFolderPath, config.projectName(), config.configRoot(), assetType, assetName])
-    logger.debug("Creating folders for assetType: %s | assetName: %s", assetType, assetName)
+    folderPath = os.path.sep.join(
+        [
+            baseFolderPath,
+            config.projectName(),
+            config.configRoot(),
+            assetType,
+            assetName,
+        ]
+    )
+    logger.debug(
+        "Creating folders for assetType: %s | assetName: %s", assetType, assetName
+    )
     logger.debug("baseFolderPath: %s", baseFolderPath)
     logger.debug("folderPath: %s", folderPath)
     if not os.path.isdir(folderPath):

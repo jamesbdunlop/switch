@@ -27,25 +27,43 @@ for file in os.listdir(dir):
         configFiles.append(fp)
 
 dataFiles = [
-('', [r'D:\CODE\Python\jamesd\switch\switch.ico']),
-('', [r'D:\CODE\Python\jamesd\switch\readme.md']),
-('imageformats', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\imageformats\qico.dll']),
-('platforms', [r'C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll']),
-('themes\core_blue', [r'D:\CODE\Python\jamesd\switch\themes\core_blue\theme.json']),
-('themes\core_green', [r'D:\CODE\Python\jamesd\switch\themes\core_green\theme.json']),
+    ("", [r"D:\CODE\Python\jamesd\switch\switch.ico"]),
+    ("", [r"D:\CODE\Python\jamesd\switch\readme.md"]),
+    (
+        "imageformats",
+        [
+            r"C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\imageformats\qico.dll"
+        ],
+    ),
+    (
+        "platforms",
+        [
+            r"C:\Python\Python310\Lib\site-packages\PyQt5\Qt5\plugins\platforms\qwindows.dll"
+        ],
+    ),
+    ("themes\core_blue", [r"D:\CODE\Python\jamesd\switch\themes\core_blue\theme.json"]),
+    (
+        "themes\core_green",
+        [r"D:\CODE\Python\jamesd\switch\themes\core_green\theme.json"],
+    ),
 ]
 
-dataFiles.append(('themes\iconpacks\core', iconPackFiles))
-dataFiles.append(('themes\core', coreThemeFiles))
-dataFiles.append(('configs', configFiles))
+dataFiles.append(("themes\iconpacks\core", iconPackFiles))
+dataFiles.append(("themes\core", coreThemeFiles))
+dataFiles.append(("configs", configFiles))
 
-setup(name="switch",
-      version="0.0.2",
-      author="James B Dunlop",
-      author_email="james@anim83d.com",
-      packages=["configs", "services", "themes", "widgets"],
-      data_files=dataFiles,
-      windows=[{
+setup(
+    name="switch",
+    version="0.0.2",
+    author="James B Dunlop",
+    author_email="james@anim83d.com",
+    packages=["configs", "services", "themes", "widgets"],
+    data_files=dataFiles,
+    windows=[
+        {
             "script": "switch.py",
             "icon_resources": [(1, "switch.ico")],
-            "dest_base":"switch"}])
+            "dest_base": "switch",
+        }
+    ],
+)

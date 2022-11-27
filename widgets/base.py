@@ -19,7 +19,9 @@ class IconMixin:
             QIcon
         """
         self._ICOPATHDIR = QtCore.QDir(st_factory.ICONPATH)
-        iconPath = os.path.join(self._ICOPATHDIR.path(), self.themeName, "{}.png".format(iconName))
+        iconPath = os.path.join(
+            self._ICOPATHDIR.path(), self.themeName, "{}.png".format(iconName)
+        )
         iconQDir = QtCore.QDir(iconPath)
         iconQDir.makeAbsolute()
         icon = QtGui.QIcon(iconQDir.absolutePath())

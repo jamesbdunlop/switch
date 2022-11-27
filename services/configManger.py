@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-frozen = getattr(sys, 'frozen', '')
+frozen = getattr(sys, "frozen", "")
 
 
 @dataclass
@@ -28,6 +28,7 @@ class Config:
     "BASEFOLDERS": {}
     From there you are free to add any named kind of folderSchema  you want.
     """
+
     data: dict
     _configName = str
     _configPath = str
@@ -111,7 +112,25 @@ class Config:
         return self.projectPathTokens() + [self.projectName(), self.configRoot()]
 
     def validExtensions(self):
-        return self.data.get("validExt", (".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL", ".lys", ".dlp"))
+        return self.data.get(
+            "validExt",
+            (
+                ".ma",
+                ".mb",
+                ".obj",
+                ".jpg",
+                ".png",
+                ".ZPR",
+                ".tif",
+                ".tga",
+                ".zpr",
+                ".stl",
+                ".ZTL",
+                ".lys",
+                ".dlp",
+            ),
+        )
+
 
 def getConfigByFilePath(filepath):
     """
@@ -158,20 +177,22 @@ def getConfigFilepath(configName):
 
     if not frozen:
         currentPath = os.path.dirname(__file__).replace("\\", "/")
-    elif frozen in ('dll', 'console_exe', 'windows_exe'):
+    elif frozen in ("dll", "console_exe", "windows_exe"):
         # py2exe:
         currentPath = os.path.dirname(sys.executable).replace("\\", "/")
 
     tokens = os.path.split(currentPath)
     currentPath = os.path.sep.join(tokens[:-1])
-    configPath = "{}.json".format(os.path.sep.join([currentPath, "configs", configName]))
+    configPath = "{}.json".format(
+        os.path.sep.join([currentPath, "configs", configName])
+    )
     qdir = QtCore.QDir()
     qdir.setPath(configPath)
     qdir.makeAbsolute()
     logger.debug("Fetching config: %s", qdir.path())
     configPath = qdir.path()
     if not os.path.isfile(configPath):
-        logger.warning("Config does not exist! \n\t%s",configPath)
+        logger.warning("Config does not exist! \n\t%s", configPath)
         return None
 
     return qdir.path()
@@ -247,4 +268,3 @@ def saveConfig(filepath, data):
     logger.debug("Saving config: %s", filepath)
     with open(filepath, "w") as outfile:
         outfile.write(json.dumps(data))
-

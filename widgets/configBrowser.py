@@ -2,7 +2,8 @@ import os, sys
 import logging
 from PySide2 import QtWidgets, QtCore
 from themes import factory as st_factory
-frozen = getattr(sys, 'frozen', '')
+
+frozen = getattr(sys, "frozen", "")
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -27,7 +28,7 @@ class ConfigBrowser(QtWidgets.QFileDialog):
 
         if not frozen:
             currentPath = os.path.dirname(__file__).replace("\\", "/")
-        elif frozen in ('dll', 'console_exe', 'windows_exe'):
+        elif frozen in ("dll", "console_exe", "windows_exe"):
             # py2exe:
             currentPath = os.path.dirname(sys.executable).replace("\\", "/")
 

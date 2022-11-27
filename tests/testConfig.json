@@ -1,0 +1,25 @@
+{
+  "projectName": "testProject",
+  "projectPath": "C:/temp",
+  "configRoot": "tempConfigRoot",
+  "validExt": [".ma", ".mb", ".obj", ".jpg", ".png", ".ZPR", ".tif", ".tga", ".zpr", ".stl", ".ZTL", ".lys", ".dlp"],
+  "ROOTS": {
+    "root01": null,
+    "root02": null
+  },
+  "BASEFOLDERS": {
+    "base01": "BASE01",
+    "base02": "BASE02",
+    "base03": "BASE03"
+  },
+  "BASE01": {
+    "root01SubFolder": null
+  },
+  "BASE02": {
+    "root02SubFolder": null
+  },
+  "BASE03": {
+    "root03SubFolder01": null,
+    "root03SubFolder02": null
+  }
+}

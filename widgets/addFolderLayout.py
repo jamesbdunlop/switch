@@ -13,12 +13,16 @@ class AddFolderLayout(BaseWidget):
     name = QtCore.Signal(str, name="name")
 
     def __init__(self, themeName, themeColor, parent=None):
-        super(AddFolderLayout, self).__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+        super(AddFolderLayout, self).__init__(
+            themeName=themeName, themeColor=themeColor, parent=parent
+        )
         self.setWindowTitle("Add Folder Schema")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.wl = QtWidgets.QVBoxLayout(self)
         self.nameInput = QtWidgets.QLineEdit()
-        self.nameInput.setPlaceholderText("Enter the name for this subFolder mapping...")
+        self.nameInput.setPlaceholderText(
+            "Enter the name for this subFolder mapping..."
+        )
 
         self.buttonLayout = QtWidgets.QHBoxLayout()
         acceptButton = QtWidgets.QPushButton("Accept")

@@ -7,14 +7,16 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-frozen = getattr(sys, 'frozen', '')
+frozen = getattr(sys, "frozen", "")
 if not frozen:
     PATH = os.path.dirname(__file__).replace("\\", "/")
     ICONPATH = "{}/iconpacks".format(os.path.dirname(__file__).replace("\\", "/"))
-elif frozen in ('dll', 'console_exe', 'windows_exe'):
+elif frozen in ("dll", "console_exe", "windows_exe"):
     # py2exe:
     PATH = "{}/themes".format(os.path.dirname(sys.executable).replace("\\", "/"))
-    ICONPATH = "{}/themes/iconpacks".format(os.path.dirname(sys.executable).replace("\\", "/"))
+    ICONPATH = "{}/themes/iconpacks".format(
+        os.path.dirname(sys.executable).replace("\\", "/")
+    )
 
 
 # https://www.w3schools.com/colors/colors_monochromatic.asp
