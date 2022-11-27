@@ -366,6 +366,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 continue
             path = self.model().filePath(srcIdx)
             if os.path.isdir(path):
+                # TODO : check this over for a more generic approach
                 zippath = "{}\\{}_{}_{}_{}.zip".format(
                     dir, path.split("/")[-4], path.split("/")[-3], path.split("/")[-2], path.split("/")[-1]
                 )
