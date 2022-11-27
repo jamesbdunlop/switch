@@ -349,7 +349,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             dir = QtWidgets.QFileDialog.getExistingDirectory(
                 None,
                 "Open Directory",
-                "",
+                self.archiveFolderPath,
                 QtWidgets.QFileDialog.ShowDirsOnly
                 | QtWidgets.QFileDialog.DontResolveSymlinks,
             )
