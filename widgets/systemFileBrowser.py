@@ -149,9 +149,14 @@ class SystemFileBrowser(BaseTreeViewWidget):
             )
             openParentFolderAction.triggered.connect(self._openParentFolder)
 
+            archiveDeleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive +Del Folder")
+            archiveDeleteAction.triggered.connect(
+                partial(self._archiveSelected, asFolder=True, removeExisting=True)
+            )
+
             archiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive Folder")
             archiveAction.triggered.connect(
-                partial(self._archiveSelected, asFolder=True)
+                partial(self._archiveSelected, asFolder=True, removeExisting=False)
             )
 
         if self._isValidFile():
@@ -316,12 +321,19 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 shutil.rmtree(path)
                 logger.debug("Successfully removed directory!")
 
-    def _archiveSelected(self, asFolder=False):
+    def _archiveSelected(self, asFolder=False, removeExisting=False):
         # Warn user first
+        if removeExisting:
+            title = "Archive And Delete?!"
+            msg = "Using this action will zip and delete the selected folders."
+        else:
+            title = "Archive?!"
+            msg = "Using this action will zip the selected folders."
+
         confirm = QtWidgets.QMessageBox(
                                         QtWidgets.QMessageBox.Warning,
-                                        "Archive And Delete?!",
-                                        "Using this action will zip and delete the selected folders.",
+                                        title,
+                                        msg,
                                         QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
                                         None,
                                         QtCore.Qt.WindowStaysOnTopHint,
@@ -372,7 +384,8 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 )
                 logger.info("Archiving and cleaning: %s to %s", path, zippath)
                 ss_archiveManager.archiveFolder(inDirPath=path, outFilePath=zippath)
-                shutil.rmtree(path)
+                if removeExisting:
+                    shutil.rmtree(path)
 
     def dragMoveEvent(self, event) -> None:
         super(SystemFileBrowser, self).dragMoveEvent(event)

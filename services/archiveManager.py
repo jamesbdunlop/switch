@@ -6,6 +6,15 @@ logger = logging.getLogger(__name__)
 
 
 def archiveFile(inFilePath, outFilePath):
+    """Archive a file to zip.
+
+    Args:
+        inFilePath (str): full file path including ext of the file to archive.
+        outFilePath (str): full file path including ext to archive to.
+
+    Returns:
+        bool: success or fail
+    """
     if not os.path.isfile(inFilePath):
         logger.error("File path %s does not exist!", inFilePath)
         return False
@@ -21,6 +30,15 @@ def archiveFile(inFilePath, outFilePath):
 
 
 def archiveFolder(inDirPath, outFilePath):
+    """Archive a folder to zip.
+
+    Args:
+        inDirPath (str): full dir path of the dir to archive.
+        outFilePath (str): full zip path to archive to.
+
+    Returns:
+        bool: success or fail
+    """
     if not os.path.isdir(inDirPath):
         logger.error("Directory path %s does not exist!", inDirPath)
         return False
@@ -37,7 +55,17 @@ def archiveFolder(inDirPath, outFilePath):
 
     return True
 
+
 def restoreFile(inFilePath, rootDir):
+    """From an archive filepath restore to a directory.
+
+    Args:
+        inFilePath (str): full file path including ext of the file to archive.
+        rootDir (str): full dir path to archive to.
+
+    Returns:
+        bool: success for fail
+    """
     if not os.path.isfile(inFilePath):
         logger.error("File path %s does not exist!", inFilePath)
         return False
@@ -46,3 +74,8 @@ def restoreFile(inFilePath, rootDir):
     archive.extractall(path=rootDir)
     logger.info("Successfully restored %s to %s", inFilePath, rootDir)
     return True
+
+
+if __name__ == "__main__":
+    path = "C:\\_recovery\\baseconfig_assets_Character_Arachne.zip"
+    restoreFile(inFilePath=path, rootDir="C:\\temp")
