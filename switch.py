@@ -491,7 +491,8 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
             name of the color of the theme (if it exists) eg green, blue
         filePath (string):
             path to the config.json
-
+        qtapp (QApplication):
+            App for splashScr
     """
     config = ss_configManager.getConfigByFilePath(filePath)
     logger.debug("config: %s", config)
