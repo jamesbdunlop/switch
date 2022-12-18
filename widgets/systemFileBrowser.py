@@ -549,7 +549,23 @@ class CustomFileBrowser(BaseTreeViewWidget):
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self._rcMenu)
 
+    def selHasArchive(self):
+        rowIndices = self.selectedIndexes()
+        for row in rowIndices:
+            srcIdx = self._proxyModel.mapToSource(row)
+            if srcIdx.column() != 0:
+                continue
+            
+            path = self.model().filePath(srcIdx)
+            if os.path.isfile(path) and path.endswith(".zip"):
+                return True
+        return False
+
     def _rcMenu(self, point):
+        rowIndices = self.selectedIndexes()
+        if not rowIndices:
+            return
+
         self.menu = QtWidgets.QMenu()
         self.menu.setTitle("Actions:")
         self.menu.setWindowTitle("rcMenu")
@@ -560,8 +576,9 @@ class CustomFileBrowser(BaseTreeViewWidget):
         )
         deleteAction.triggered.connect(self._deleteSelected)
 
-        restoreArchiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"),"Restore Archive")
-        restoreArchiveAction.triggered.connect(self._restoreArchive)
+        if self.selHasArchive():
+            restoreArchiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"),"Restore Archive")
+            restoreArchiveAction.triggered.connect(self._restoreArchive)
 
         self.menu.move(self.mapToGlobal(point))
         self.menu.show()
