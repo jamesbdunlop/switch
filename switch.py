@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-VERS = "0.1.6"
+VERS = "0.1.7"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
@@ -192,7 +192,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         customBrowserWidget = CustomBrowserDockWidget(themeName=self.themeName, themeColor=self.themeColor, dir=dir)
         customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
         self.themeChanged.connect(customBrowserWidget.setTheme)
-        
+
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, customBrowserWidget)
         self._customBrowserDockWidgets.append(customBrowserWidget)
         if dir not in self._recentCustomBrowserPaths:
