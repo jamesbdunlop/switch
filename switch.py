@@ -2,20 +2,22 @@
 
 import sys, os
 import logging
+import time
 from functools import partial
 from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
-from widgets import systemFileBrowser as suiw_systemBrowser
-from widgets import configBrowser as suiw_configBrowser
-from widgets.folderDockWidget import FolderDockWidget
-from widgets.configDockWidget import ConfigDockWidget
-from widgets.base import BaseDockWidget as BaseDockWidget
 from widgets.base import IconMixin
 from widgets.help import HelpView
-from services import folderManager as ss_folderManager
-from services import configManger as ss_configManager
+from widgets.splash import SplashWidget
+from widgets.folderDockWidget import FolderDockWidget
+from widgets.configDockWidget import ConfigDockWidget
+from widgets import configBrowser as suiw_configBrowser
+from widgets.base import BaseDockWidget as BaseDockWidget
+from widgets import systemFileBrowser as suiw_systemBrowser
 from widgets.themeEditorDockWidget import ThemeEditorDockWidget
 from widgets.customBrowserDockWidget import CustomBrowserDockWidget
+from services import folderManager as ss_folderManager
+from services import configManger as ss_configManager
 
 insideMaya = False
 try:
@@ -189,6 +191,8 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         customBrowserWidget = CustomBrowserDockWidget(themeName=self.themeName, themeColor=self.themeColor, dir=dir)
         customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
+        self.themeChanged.connect(customBrowserWidget.setTheme)
+        
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, customBrowserWidget)
         self._customBrowserDockWidgets.append(customBrowserWidget)
         if dir not in self._recentCustomBrowserPaths:
@@ -477,7 +481,7 @@ def getMayaDock():
     return dock
 
 
-def run(themeName=None, themeColor=None, filePath=""):
+def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     """
 
     Args:
@@ -491,7 +495,9 @@ def run(themeName=None, themeColor=None, filePath=""):
     """
     config = ss_configManager.getConfigByFilePath(filePath)
     logger.debug("config: %s", config)
+   
     app = Switch.instance(themeName=themeName, themeColor=themeColor, config=config)
+    
 
     if insideMaya:
         dock = getMayaDock()
@@ -499,7 +505,24 @@ def run(themeName=None, themeColor=None, filePath=""):
         dock.show()
         app.show()
     else:
+        # Splash
+        fp = QtCore.QDir(os.path.join(APP_ICONPATH, "media", "splash.png"))
+        logger.debug("fp: %s", fp.absolutePath())
+        splashImage = QtGui.QPixmap()
+        splashImage.load(fp.absolutePath())
+
+        splashScr = SplashWidget(pixmap=splashImage)
+        splashScr.resize(755, 444)
+        splashScr.showMessage("LOADING Switch Application...", 
+                            alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom, 
+                            color=QtCore.Qt.white)
+        splashScr.show()
+
+        qtapp.processEvents()
+        
+        time.sleep(2.5)
         app.show()
+        splashScr.finish(app)
 
 
 if __name__ == "__main__":
@@ -517,5 +540,6 @@ if __name__ == "__main__":
     qtapp.setApplicationName(APPNAAME)
     qtapp.setApplicationVersion(VERS)
     qtapp.setOrganizationName("James B Dunlop")
-    run(themeName=None, themeColor=None, filePath=lastOpened)
+
+    run(themeName=None, themeColor=None, filePath=lastOpened, qtapp=qtapp)
     sys.exit(qtapp.exec_())

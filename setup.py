@@ -2,6 +2,14 @@ from distutils.core import setup
 import os
 import py2exe
 
+# Media files...
+mediaFiles = list()
+dir = r"D:\CODE\Python\jamesd\switch\media"
+for file in os.listdir(dir):
+    fp = "{}/{}".format(dir, file)
+    if fp.endswith(".png"):
+        mediaFiles.append(fp)
+
 # Icon pack files...
 iconPackFiles = list()
 dir = r"D:\CODE\Python\jamesd\switch\themes\iconpacks\core"
@@ -48,6 +56,7 @@ dataFiles = [
     ),
 ]
 
+dataFiles.append(("media", mediaFiles))
 dataFiles.append(("themes\iconpacks\core", iconPackFiles))
 dataFiles.append(("themes\core", coreThemeFiles))
 dataFiles.append(("configs", configFiles))
