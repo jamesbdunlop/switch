@@ -40,11 +40,11 @@ def archiveFolder(inDirPath, outFilePath):
         bool: success or fail
     """
     if not os.path.isdir(inDirPath):
-        logger.error("Directory path %s does not exist!", inDirPath)
+        logger.info("Directory path %s does not exist!", inDirPath)
         return False
 
     if os.path.isfile(outFilePath):
-        logger.error("%s already exists!", outFilePath)
+        logger.info("%s already exists!", outFilePath)
         return
 
     with zipfile.ZipFile(outFilePath, "w") as myzip:

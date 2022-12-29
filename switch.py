@@ -38,9 +38,6 @@ WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
 DOCKTILE = "{} v{}".format(APPNAAME, VERS)
 
-# TODO: Work out the instancing for the final app, so it doesn't keep opening new instances of.
-# TODO: Workspace isn't switching in maya when setting root.
-
 frozen = getattr(sys, "frozen", "")
 if not frozen:
     APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
@@ -52,7 +49,6 @@ elif frozen in ("dll", "console_exe", "windows_exe"):
 class Switch(QtWidgets.QMainWindow, IconMixin):
     themeChanged = QtCore.Signal(list, name="themeChanged")
     configChanged = QtCore.Signal(ss_configManager.Config, name="configChanged")
-    _instance = None
 
     def __init__(self, themeName=None, themeColor=None, config=None, parent=None):
         """Creates the main ui layout for the app
@@ -144,6 +140,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.createFoldersButton = None
         # MAIN APP TOOLBAR
         self.toolbar = QtWidgets.QToolBar()
+        self.toolbar.setObjectName("mainToolBar")
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self._updateToolBarButtons()
 
@@ -160,7 +157,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setCentralWidget(self.centerW)
 
         self.resize(600, 800)
-        self._instance = self
 
     def _customBrowserWidgetExists(self, directoryPath):
         for widget in self._customBrowserDockWidgets:
@@ -347,14 +343,12 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setStyleSheet(self.sheet)
         self.themeChanged.emit([self.themeName, self.themeColor])
 
-    @staticmethod
-    def instance(themeName, themeColor, config=None):
-        if Switch._instance is None:
-            return Switch(themeName, themeColor, config)
-        else:
-            return Switch._instance
-
     def setConfig(self, filepath):
+        """Sets a config for the application effectively swapping the application folders.
+
+        Args:
+            filepath (string): file path including extension to the json
+        """
         self.config = ss_configManager.getConfigByFilePath(filepath)
         self.config.setConfigPath(filepath)
         if self.config is not None and os.path.isfile(filepath):
@@ -382,8 +376,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         logger.debug("Saving windows settings now...")
 
         # Window size etc
-        self._settings.setValue("size", self.size())
-        self._settings.setValue("pos", self.pos())
         self._settings.setValue("recentConfigs", self._recentConfigs)
         self._settings.setValue("recentFilepaths", self._recentFilepaths)
         self._settings.setValue("themeName", self.themeName)
@@ -392,6 +384,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         if self.config is not None:
             self._settings.setValue("lastOpened", self.config.configPath())
+
+        self._settings.setValue("geometry", self.saveGeometry())
+        self._settings.setValue("state", self.saveState())
 
         self._settings.endGroup()
         # Force the show for the browsers settings to save
@@ -402,6 +397,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         super(Switch, self).show()
         if setOnTop:
             return
+
         logger.debug("Applying windows settings now...")
         self._settings.beginGroup("mainWindow")
 
@@ -411,8 +407,8 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             
         # See Window Geometry for a discussion on why it is better to call QWidget::resize() and QWidget::move() rather
         # than QWidget::setGeometry() to restore a window's geometry.
-        self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
-        self.move(self._settings.value("pos", defaultValue=QtCore.QPoint(0, 0)))
+        # self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
+        # self.move(self._settings.value("pos", defaultValue=QtCore.QPoint(0, 0)))
 
         self._recentConfigs = self._settings.value("recentConfigs", defaultValue=list())
         logger.debug("Restoring recentConfigs: %s", self._recentConfigs)
@@ -452,6 +448,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         themeName = self._settings.value("themeName", defaultValue="core")
         themeColor = self._settings.value("themeColor", defaultValue="")
         self.setTheme(themeName, themeColor)
+
+        self.restoreGeometry(self._settings.value("geometry"))
+        self.restoreState(self._settings.value("state",  QtCore.QByteArray()))
 
         self._settings.endGroup()
         # Force the show for the browsers settings to fire
@@ -497,8 +496,7 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     config = ss_configManager.getConfigByFilePath(filePath)
     logger.debug("config: %s", config)
    
-    app = Switch.instance(themeName=themeName, themeColor=themeColor, config=config)
-    
+    app = Switch(themeName=themeName, themeColor=themeColor, config=config)
 
     if insideMaya:
         dock = getMayaDock()

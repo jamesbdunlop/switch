@@ -24,6 +24,7 @@ class CustomBrowserDockWidget(BaseDockWidget, IconMixin):
         )
         self._dirPath = dir
         self.setWindowTitle(dir)
+        self.setObjectName(dir)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         _customBrowserWidget = suiw_systemBrowser.CustomFileBrowser(
