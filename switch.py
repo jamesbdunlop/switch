@@ -511,7 +511,7 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
         splashImage.load(fp.absolutePath())
 
         splashScr = SplashWidget(pixmap=splashImage)
-        splashScr.resize(755, 444)
+        splashScr.resize(800, 200)
         splashScr.showMessage("LOADING Switch Application...", 
                             alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom, 
                             color=QtCore.Qt.white)
