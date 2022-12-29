@@ -400,11 +400,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         logger.debug("Applying windows settings now...")
         self._settings.beginGroup("mainWindow")
-
-        self._recentCustomBrowserPaths = list(set(self._settings.value("recentCustomBrowsers", defaultValue=[])))
-        for customBrowserPath in self._recentCustomBrowserPaths:
-            self._addCustomBrowser(dir=customBrowserPath)
-            
+          
         # See Window Geometry for a discussion on why it is better to call QWidget::resize() and QWidget::move() rather
         # than QWidget::setGeometry() to restore a window's geometry.
         # self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
@@ -449,6 +445,10 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         themeColor = self._settings.value("themeColor", defaultValue="")
         self.setTheme(themeName, themeColor)
 
+        self._recentCustomBrowserPaths = list(set(self._settings.value("recentCustomBrowsers", defaultValue=[])))
+        for customBrowserPath in self._recentCustomBrowserPaths:
+            self._addCustomBrowser(dir=customBrowserPath)
+        
         self.restoreGeometry(self._settings.value("geometry"))
         self.restoreState(self._settings.value("state",  QtCore.QByteArray()))
 
