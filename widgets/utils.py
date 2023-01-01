@@ -47,7 +47,7 @@ def errorWidget(title, message):
         title (string): Title of the widget
         message (string): Message of the widget
     """
-    widget = QtWidgets.QErrorMessage ()
+    widget = QtWidgets.QErrorMessage()
     widget.setObjectName("ErrorDialog")
     widget.setWindowTitle(title)
     widget.showMessage(message)

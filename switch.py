@@ -49,7 +49,7 @@ elif frozen in ("dll", "console_exe", "windows_exe"):
 class Switch(QtWidgets.QMainWindow, IconMixin):
     themeChanged = QtCore.Signal(list, name="themeChanged")
     configChanged = QtCore.Signal(ss_configManager.Config, name="configChanged")
-    
+
     def __init__(self, themeName=None, themeColor=None, config=None, parent=None):
         """Creates the main ui layout for the app
 
@@ -162,7 +162,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             if widget.getDir() == directoryPath:
                 return True
         return False
-    
+
     def _customDockWidgetRemoved(self, dirPath):
         for widget in self._customBrowserDockWidgets:
             if widget.getDir() == dirPath:
@@ -184,7 +184,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         if self._customBrowserWidgetExists(dir):
             return
 
-        customBrowserWidget = CustomBrowserDockWidget(themeName=self.themeName, themeColor=self.themeColor, dir=dir)
+        customBrowserWidget = CustomBrowserDockWidget(
+            themeName=self.themeName, themeColor=self.themeColor, dir=dir
+        )
         customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
         self.themeChanged.connect(customBrowserWidget.setTheme)
 
@@ -276,9 +278,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
     def _createConfigUI(self):
         if self.configDockWidget is None:
-            self.configDockWidget = ConfigDockWidget(
-                self.themeName, self.themeColor
-            )
+            self.configDockWidget = ConfigDockWidget(self.themeName, self.themeColor)
             self.configDockWidget.setFloating(True)
             self.configDockWidget.resize(800, 600)
             self.themeChanged.connect(self.configDockWidget.setTheme)
@@ -348,6 +348,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         Args:
             filepath (string): file path including extension to the json
         """
+        if not filepath:
+            return
+
         self.config = ss_configManager.getConfigByFilePath(filepath)
         self.config.setConfigPath(filepath)
         if self.config is not None and os.path.isfile(filepath):
@@ -399,7 +402,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         logger.debug("Applying windows settings now...")
         self._settings.beginGroup("mainWindow")
-          
+
         # See Window Geometry for a discussion on why it is better to call QWidget::resize() and QWidget::move() rather
         # than QWidget::setGeometry() to restore a window's geometry.
         # self.resize(self._settings.value("size", defaultValue=QtCore.QSize(800, 600)))
@@ -424,7 +427,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         )
         logger.debug("Restoring recentConfigs: %s", self._recentConfigs)
         self._updateRecentFilesMenu()
-    
+
         self.fileMenu.addSeparator()
         self.exitApp = self.fileMenu.addAction(
             self._fetchIcon("iconmonstr-x-mark-4-icon-256"), "Exit"
@@ -444,12 +447,14 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         themeColor = self._settings.value("themeColor", defaultValue="")
         self.setTheme(themeName, themeColor)
 
-        self._recentCustomBrowserPaths = list(set(self._settings.value("recentCustomBrowsers", defaultValue=[])))
+        self._recentCustomBrowserPaths = list(
+            set(self._settings.value("recentCustomBrowsers", defaultValue=[]))
+        )
         for customBrowserPath in self._recentCustomBrowserPaths:
             self._addCustomBrowser(dir=customBrowserPath)
-        
+
         self.restoreGeometry(self._settings.value("geometry"))
-        self.restoreState(self._settings.value("state",  QtCore.QByteArray()))
+        self.restoreState(self._settings.value("state", QtCore.QByteArray()))
 
         self._settings.endGroup()
         # Force the show for the browsers settings to fire
@@ -457,6 +462,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
 
 if insideMaya:
+
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)
@@ -475,7 +481,7 @@ def getMayaDock():
             if dockName == WORKSPACEDOCKNAME:
                 dock = dock
                 break
-    
+
     dock.show(dockable=True)
     return dock
 
@@ -495,7 +501,7 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     """
     config = ss_configManager.getConfigByFilePath(filePath)
     logger.debug("config: %s", config)
-   
+
     app = Switch(themeName=themeName, themeColor=themeColor, config=config)
     if insideMaya:
         dock = getMayaDock()
@@ -511,13 +517,15 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
 
         splashScr = SplashWidget(pixmap=splashImage)
         splashScr.resize(800, 200)
-        splashScr.showMessage("LOADING Switch Application...", 
-                            alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom, 
-                            color=QtCore.Qt.white)
+        splashScr.showMessage(
+            "LOADING Switch Application...",
+            alignment=QtCore.Qt.AlignRight | QtCore.Qt.AlignBottom,
+            color=QtCore.Qt.white,
+        )
         splashScr.show()
 
         qtapp.processEvents()
-        
+
         time.sleep(2.5)
         app.show()
         splashScr.finish(app)

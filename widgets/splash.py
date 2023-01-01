@@ -8,6 +8,10 @@ logging.basicConfig()
 
 
 class SplashWidget(QtWidgets.QSplashScreen):
-    def __init__(self, parent=None, pixmap=None, f=QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint) -> None:
+    def __init__(
+        self,
+        parent=None,
+        pixmap=None,
+        f=QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint,
+    ) -> None:
         super(SplashWidget, self).__init__(parent=parent, pixmap=pixmap, f=f)
-    

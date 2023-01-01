@@ -96,8 +96,6 @@ class ThemeEditorDockWidget(BaseDockWidget):
         self.w.exec_()
         input.setText(str(self.w.currentColor().name()))
 
-        print("Widget: %s", input)
-
     def _saveConfig(self):
         data = {}
         for k, v in self._data.items():

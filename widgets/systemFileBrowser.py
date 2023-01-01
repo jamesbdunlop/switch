@@ -149,12 +149,16 @@ class SystemFileBrowser(BaseTreeViewWidget):
             )
             openParentFolderAction.triggered.connect(self._openParentFolder)
 
-            archiveDeleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive +Del Folder")
+            archiveDeleteAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-zip-14-240"), "Archive +Del Folder"
+            )
             archiveDeleteAction.triggered.connect(
                 partial(self._archiveSelected, removeExisting=True)
             )
 
-            archiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive Folder")
+            archiveAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-zip-14-240"), "Archive Folder"
+            )
             archiveAction.triggered.connect(
                 partial(self._archiveSelected, removeExisting=False)
             )
@@ -336,13 +340,13 @@ class SystemFileBrowser(BaseTreeViewWidget):
             msg = "Using this action will zip the selected folders."
 
         confirm = QtWidgets.QMessageBox(
-                                        QtWidgets.QMessageBox.Warning,
-                                        title,
-                                        msg,
-                                        QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
-                                        None,
-                                        QtCore.Qt.WindowStaysOnTopHint,
-                                    )
+            QtWidgets.QMessageBox.Warning,
+            title,
+            msg,
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Cancel,
+            None,
+            QtCore.Qt.WindowStaysOnTopHint,
+        )
         confirm.setStyleSheet(self.sheet)
         if confirm.exec_() != QtWidgets.QMessageBox.Ok:
             return
@@ -351,13 +355,13 @@ class SystemFileBrowser(BaseTreeViewWidget):
         usePrevious = False
         if self.archiveFolderPath is not None:
             confirm2 = QtWidgets.QMessageBox(
-                                            QtWidgets.QMessageBox.Warning,
-                                            "Use Previous Archive Folder?",
-                                            "Archive to: {}".format(self.archiveFolderPath),
-                                            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
-                                            None,
-                                            QtCore.Qt.WindowStaysOnTopHint,
-                                        )
+                QtWidgets.QMessageBox.Warning,
+                "Use Previous Archive Folder?",
+                "Archive to: {}".format(self.archiveFolderPath),
+                QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.No,
+                None,
+                QtCore.Qt.WindowStaysOnTopHint,
+            )
             confirm2.setStyleSheet(self.sheet)
             if confirm2.exec_() == QtWidgets.QMessageBox.Ok:
                 usePrevious = True
@@ -375,7 +379,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             self.archiveFolderPath = dir
         else:
             dir = self.archiveFolderPath
-        
+
         rowIndices = self.selectedIndexes()
         for row in rowIndices:
             srcIdx = self._proxyModel.mapToSource(row)
@@ -385,13 +389,19 @@ class SystemFileBrowser(BaseTreeViewWidget):
             if os.path.isdir(path):
                 # TODO : check this over for a more generic approach
                 zippath = "{}\\{}_{}_{}_{}.zip".format(
-                    dir, path.split("/")[-4], path.split("/")[-3], path.split("/")[-2], path.split("/")[-1]
+                    dir,
+                    path.split("/")[-4],
+                    path.split("/")[-3],
+                    path.split("/")[-2],
+                    path.split("/")[-1],
                 )
                 logger.info("Archiving and cleaning: %s to %s", path, zippath)
-                result = ss_archiveManager.archiveFolder(inDirPath=path, outFilePath=zippath)
+                result = ss_archiveManager.archiveFolder(
+                    inDirPath=path, outFilePath=zippath
+                )
                 if not result:
                     continue
-                
+
                 if removeExisting:
                     shutil.rmtree(path)
 
@@ -516,7 +526,9 @@ class SystemFileBrowser(BaseTreeViewWidget):
     def show(self, setOnTop=False):
         super(SystemFileBrowser, self).show()
         self._settings.beginGroup("sysBrowserWindow")
-        self.archiveFolderPath = self._settings.value("archiveFolderPath", defaultValue="")
+        self.archiveFolderPath = self._settings.value(
+            "archiveFolderPath", defaultValue=""
+        )
         self._settings.endGroup()
 
 
@@ -563,7 +575,7 @@ class CustomFileBrowser(BaseTreeViewWidget):
             srcIdx = self._proxyModel.mapToSource(row)
             if srcIdx.column() != 0:
                 continue
-            
+
             path = self.model().filePath(srcIdx)
             if os.path.isfile(path) and path.endswith(".zip"):
                 return True
@@ -585,7 +597,9 @@ class CustomFileBrowser(BaseTreeViewWidget):
         deleteAction.triggered.connect(self._deleteSelected)
 
         if self.selHasArchive():
-            restoreArchiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"),"Restore Archive")
+            restoreArchiveAction = self.menu.addAction(
+                self._fetchIcon("iconmonstr-zip-14-240"), "Restore Archive"
+            )
             restoreArchiveAction.triggered.connect(self._restoreArchive)
 
         self.menu.move(self.mapToGlobal(point))
@@ -650,7 +664,7 @@ class CustomFileBrowser(BaseTreeViewWidget):
             srcIdx = self._proxyModel.mapToSource(row)
             if srcIdx.column() != 0:
                 continue
-            
+
             path = self.model().filePath(srcIdx)
             if os.path.isfile(path) and path.endswith(".zip"):
                 logger.info("Restoring archive: %s", path)

@@ -11,8 +11,6 @@ logging.basicConfig()
 
 
 class ConfigBrowser(QtWidgets.QFileDialog):
-    # configSelected = QtCore.Signal(str, name="configSelected")
-
     def __init__(self, themeName, themeColor, toSave=False, parent=None):
         super(ConfigBrowser, self).__init__(parent=parent)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
@@ -43,17 +41,6 @@ class ConfigBrowser(QtWidgets.QFileDialog):
         self._dir.makeAbsolute()
         self.setDirectory(self._dir.path())
         self.resize(600, 500)
-
-    # def mouseDoubleClickEvent(self, e):
-    #     super(ConfigBrowser, self).mouseDoubleClickEvent(e)
-    #     modelIdx = self.indexAt(e.pos())
-    #     filePath = self.model().filePath(modelIdx)
-    #     if os.path.isfile(filePath) and filePath.endswith(".json"):
-    #         print(filePath)
-    #
-    #     configName = filePath.split("/")[-1].replace(".json", "")
-    #     self.configSelected.emit(configName)
-    #     self.close()
 
 
 if __name__ == "__main__":
