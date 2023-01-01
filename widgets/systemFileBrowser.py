@@ -151,12 +151,12 @@ class SystemFileBrowser(BaseTreeViewWidget):
 
             archiveDeleteAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive +Del Folder")
             archiveDeleteAction.triggered.connect(
-                partial(self._archiveSelected, asFolder=True, removeExisting=True)
+                partial(self._archiveSelected, removeExisting=True)
             )
 
             archiveAction = self.menu.addAction(self._fetchIcon("iconmonstr-zip-14-240"), "Archive Folder")
             archiveAction.triggered.connect(
-                partial(self._archiveSelected, asFolder=True, removeExisting=False)
+                partial(self._archiveSelected, removeExisting=False)
             )
 
         if self._isValidFile():
@@ -321,7 +321,12 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 shutil.rmtree(path)
                 logger.debug("Successfully removed directory!")
 
-    def _archiveSelected(self, asFolder=False, removeExisting=False):
+    def _archiveSelected(self, removeExisting=False):
+        """_summary_
+
+        Args:
+            removeExisting (bool, optional): _description_. Defaults to False.
+        """
         # Warn user first
         if removeExisting:
             title = "Archive And Delete?!"
@@ -383,7 +388,10 @@ class SystemFileBrowser(BaseTreeViewWidget):
                     dir, path.split("/")[-4], path.split("/")[-3], path.split("/")[-2], path.split("/")[-1]
                 )
                 logger.info("Archiving and cleaning: %s to %s", path, zippath)
-                ss_archiveManager.archiveFolder(inDirPath=path, outFilePath=zippath)
+                result = ss_archiveManager.archiveFolder(inDirPath=path, outFilePath=zippath)
+                if not result:
+                    continue
+                
                 if removeExisting:
                     shutil.rmtree(path)
 

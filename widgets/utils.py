@@ -38,3 +38,17 @@ def createLabeledInput(name, placeHolderText="", toolTip=None):
     layout.addWidget(lineEdit, 0, 1)
 
     return layout, lineEdit
+
+
+def errorWidget(title, message):
+    """Use for catching errors when files exist, or folders exist etc etc
+
+    Args:
+        title (string): Title of the widget
+        message (string): Message of the widget
+    """
+    widget = QtWidgets.QErrorMessage ()
+    widget.setObjectName("ErrorDialog")
+    widget.setWindowTitle(title)
+    widget.showMessage(message)
+    widget.exec_()

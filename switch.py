@@ -49,7 +49,7 @@ elif frozen in ("dll", "console_exe", "windows_exe"):
 class Switch(QtWidgets.QMainWindow, IconMixin):
     themeChanged = QtCore.Signal(list, name="themeChanged")
     configChanged = QtCore.Signal(ss_configManager.Config, name="configChanged")
-
+    
     def __init__(self, themeName=None, themeColor=None, config=None, parent=None):
         """Creates the main ui layout for the app
 
@@ -63,7 +63,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self._recentFilepaths = list()
         self._recentCustomBrowserPaths = list()
         self._customBrowserDockWidgets = list()
-        
         self.config = config
         self.configPath = (
             os.path.join(self.config.projectPath(), self.config.projectName())
@@ -458,7 +457,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
 
 if insideMaya:
-
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)
@@ -471,12 +469,14 @@ def getMayaDock():
     exists = cmds.workspaceControl(WORKSPACEDOCKNAME, q=True, exists=True)
     if not exists:
         dock = MayaDockWidget()
-        dock.show(dockable=True)
     else:
         docks = mag_mayaMixin.mixinWorkspaceControls
         for dockName, dock in docks.items():
             if dockName == WORKSPACEDOCKNAME:
                 dock = dock
+                break
+    
+    dock.show(dockable=True)
     return dock
 
 
@@ -497,7 +497,6 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     logger.debug("config: %s", config)
    
     app = Switch(themeName=themeName, themeColor=themeColor, config=config)
-
     if insideMaya:
         dock = getMayaDock()
         dock.layout.addWidget(app)

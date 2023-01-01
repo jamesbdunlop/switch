@@ -1,7 +1,7 @@
 import os, sys
 import logging
 import zipfile
-
+import widgets.utils as widgetUtils
 logger = logging.getLogger(__name__)
 
 
@@ -16,12 +16,14 @@ def archiveFile(inFilePath, outFilePath):
         bool: success or fail
     """
     if not os.path.isfile(inFilePath):
-        logger.error("File path %s does not exist!", inFilePath)
+        message="File path %s is not a file!", inFilePath
+        widgetUtils.errorWidget(title="File path error.", message=message)
         return False
 
     if os.path.isfile(outFilePath):
-        logger.error("%s already exists!", outFilePath)
-        return
+        message="%s already exists!", outFilePath
+        widgetUtils.errorWidget(title="File already exists.", message=message)
+        return False
 
     with zipfile.ZipFile(outFilePath, "w") as myzip:
         myzip.write(inFilePath)
@@ -44,11 +46,12 @@ def archiveFolder(inDirPath, outFilePath):
         return False
 
     if os.path.isfile(outFilePath):
-        logger.info("%s already exists!", outFilePath)
-        return
+        message="Can not archive this file as file already exists on disk. \nPlease remove existing an try again."
+        widgetUtils.errorWidget(title="File exists.", message=message)
+        return False
 
     with zipfile.ZipFile(outFilePath, "w") as myzip:
-        for root, dirs, files in os.walk(inDirPath, topdown=True):
+        for root, _, files in os.walk(inDirPath, topdown=True):
             for file in files:
                 fp = os.path.join(root, file)
                 myzip.write(fp)
@@ -67,7 +70,8 @@ def restoreFile(inFilePath, rootDir):
         bool: success for fail
     """
     if not os.path.isfile(inFilePath):
-        logger.error("File path %s does not exist!", inFilePath)
+        message="Can not restore archive as it does not exist on disk!?"
+        widgetUtils.errorWidget(title="Filepath does not exist.", message=message)
         return False
     
     archive = zipfile.ZipFile(inFilePath)
