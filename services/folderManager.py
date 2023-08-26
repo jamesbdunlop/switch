@@ -74,4 +74,4 @@ def createFolders(config, assetType, assetName):
         qdir.mkpath(folderPath)
         logger.debug("Created %s ", qdir.path())
 
-    _createFolders(folderPath, config.baseFolders())
+    _createFolders(folderPath, config.parseBaseFolders())

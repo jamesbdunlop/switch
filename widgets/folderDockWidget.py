@@ -27,7 +27,7 @@ class FolderDockWidget(BaseDockWidget):
         self._assetType = None
         self.config = config
 
-        for assetType in self.config.rootsAslist():
+        for assetType in self.config.iterRoots():
             rb = QtWidgets.QRadioButton(assetType)
             rb.toggled.connect(partial(self._changeAssetType, assetType))
             self.bl.addWidget(rb)

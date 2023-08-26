@@ -231,7 +231,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.toolbarLabel = QtWidgets.QLabel("Asset roots: ")
         self.toolbar.addWidget(self.toolbarLabel)
 
-        rootList = self.config.rootsAslist()
+        rootList = list(self.config.iterRoots())
         rootList.sort()
         for rootDirName in ["root"] + rootList:
             self.toolbar.addSeparator()
@@ -462,7 +462,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
 
 if insideMaya:
-
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)

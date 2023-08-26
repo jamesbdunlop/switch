@@ -1,6 +1,7 @@
 from distutils.core import setup
 import os
 import py2exe
+from cx_Freeze import setup, Executable
 
 # Media files...
 mediaFiles = list()
@@ -68,6 +69,7 @@ setup(
     author_email="james@anim83d.com",
     packages=["configs", "services", "themes", "widgets"],
     data_files=dataFiles,
+    # executables= [Executable("switch.py")],
     windows=[
         {
             "script": "switch.py",
