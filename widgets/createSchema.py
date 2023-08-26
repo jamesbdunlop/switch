@@ -642,10 +642,6 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         self._parseLinkedFolders(data)
         return data
 
-# # Update for any renames of base folders etc
-# data = self._parseTreeToData()
-# newConfig = ss_configManager.Config(data=data)
-# self.setConfig(newConfig)
 
 if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
