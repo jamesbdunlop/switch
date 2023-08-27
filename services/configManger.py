@@ -9,8 +9,6 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-frozen = getattr(sys, "frozen", "")
-
 
 @dataclass
 class Config:
@@ -209,10 +207,9 @@ def getConfigFilepath(configName):
     if not configName:
         return None
 
-    if not frozen:
+    if getattr(sys, "frozen", False):
         currentPath = os.path.dirname(__file__).replace("\\", "/")
-    elif frozen in ("dll", "console_exe", "windows_exe"):
-        # py2exe:
+    else:
         currentPath = os.path.dirname(sys.executable).replace("\\", "/")
 
     tokens = os.path.split(currentPath)

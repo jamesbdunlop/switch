@@ -3,13 +3,18 @@ import logging
 from PySide2 import QtWidgets, QtCore
 from themes import factory as st_factory
 
-frozen = getattr(sys, "frozen", "")
-
 logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-
+def getCurrentPath():
+    if getattr(sys, "frozen", False):
+        currentPath = os.path.dirname(__file__).replace("\\", "/")
+        return currentPath
+    else:
+        currentPath = os.path.dirname(sys.executable).replace("\\", "/")
+        return currentPath
+    
 class ConfigBrowser(QtWidgets.QFileDialog):
     def __init__(self, themeName, themeColor, toSave=False, parent=None):
         super(ConfigBrowser, self).__init__(parent=parent)
@@ -24,12 +29,7 @@ class ConfigBrowser(QtWidgets.QFileDialog):
         self.sheet = st_factory.getThemeData(self.themeName, self.themeColor)
         self.setStyleSheet(self.sheet)
 
-        if not frozen:
-            currentPath = os.path.dirname(__file__).replace("\\", "/")
-        elif frozen in ("dll", "console_exe", "windows_exe"):
-            # py2exe:
-            currentPath = os.path.dirname(sys.executable).replace("\\", "/")
-
+        currentPath = getCurrentPath()
         # this frozen has the effect when running without py2exe of drilling all the way to the widgets folder
         if "widgets" in currentPath:
             tokens = currentPath.split("/")[:-1]
