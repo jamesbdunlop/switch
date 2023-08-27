@@ -38,12 +38,15 @@ WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
 DOCKTILE = "{} v{}".format(APPNAAME, VERS)
 
-frozen = getattr(sys, "frozen", "")
-if not frozen:
-    APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
-elif frozen in ("dll", "console_exe", "windows_exe"):
-    # py2exe:
-    APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
+
+def getIconPath():
+    if not getattr(sys, "frozen", False):
+        APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
+        return APP_ICONPATH
+    else:
+        # py2exe:
+        APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
+        return APP_ICONPATH
 
 
 class Switch(QtWidgets.QMainWindow, IconMixin):
@@ -76,7 +79,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setObjectName("{}_mainWindow".format(APPNAAME))
         self.setWindowIcon(
             QtGui.QIcon(
-                QtCore.QDir(os.path.join(APP_ICONPATH, "switch.ico")).absolutePath()
+                QtCore.QDir(os.path.join(getIconPath(), "switchIcon.ico")).absolutePath()
             )
         )
 
@@ -231,7 +234,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.toolbarLabel = QtWidgets.QLabel("Asset roots: ")
         self.toolbar.addWidget(self.toolbarLabel)
 
-        rootList = self.config.rootsAslist()
+        rootList = list(self.config.iterRoots())
         rootList.sort()
         for rootDirName in ["root"] + rootList:
             self.toolbar.addSeparator()
@@ -462,7 +465,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
 
 if insideMaya:
-
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)
@@ -510,7 +512,7 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
         app.show()
     else:
         # Splash
-        fp = QtCore.QDir(os.path.join(APP_ICONPATH, "media", "splash.png"))
+        fp = QtCore.QDir(os.path.join(getIconPath(), "media", "splash.png"))
         logger.debug("fp: %s", fp.absolutePath())
         splashImage = QtGui.QPixmap()
         splashImage.load(fp.absolutePath())

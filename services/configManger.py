@@ -1,14 +1,13 @@
 import os, sys
 import logging
 from dataclasses import dataclass
+from constants import schema as   c_schema
 from PySide2 import QtCore
 import json
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
-
-frozen = getattr(sys, "frozen", "")
 
 
 @dataclass
@@ -33,33 +32,6 @@ class Config:
     _configName = str
     _configPath = str
 
-    def _parseData(self, data):
-        """Mutates data to fill in anything that expects to reuse other key values.
-
-        Args:
-            data (dict):
-
-        Returns:
-            dict
-        """
-        for folderName, folderData in data.items():
-            logger.debug("folderName: %s folderData: %s", folderName, folderData)
-            if folderName in ("projectName", "projectPath", "configRoot"):
-                logger.debug("Skipping %s %s", folderName, folderData)
-                continue
-
-            # None, String, Dict
-            if folderData is None or folderData == "None":
-                logger.debug("Skipping %s %s", folderName, folderData)
-                continue
-
-            if isinstance(folderData, str):
-                logger.debug("Found subFolder name...")
-                d = self.data.get(folderData)
-                data[folderName] = self._parseData(d)
-
-        return data
-
     def name(self):
         """Returns name of the config being used
 
@@ -69,21 +41,6 @@ class Config:
 
     def setName(self, confgName):
         self._configName = confgName
-
-    def baseFolders(self):
-        return self._parseData(self.data.get("BASEFOLDERS", {}))
-
-    def roots(self):
-        return self._parseData(self.data.get("ROOTS", {}))
-
-    def rootsAslist(self):
-        """
-
-        Returns:
-            list
-        """
-        roots = [root for root in self.data.get("ROOTS", {}).keys()]
-        return roots
 
     def projectName(self):
         return self.data.get("projectName", "")
@@ -131,7 +88,82 @@ class Config:
             ),
         )
 
+    def iterBaseFolders(self):
+        data = self.data.get("BASEFOLDERS", {})
+        for folderName, linkedData in data.items():
+            if not linkedData:
+                linkedData = str(None)
+            if not isinstance(linkedData, list):
+                linkedData = [linkedData]
+            yield folderName, linkedData
 
+    def getLinkedSubFolder(self, name):
+        """Get a specific linked folder's value (dict)"""
+        return self.data.get(name, {})
+        
+    def iterLinkedSubFolderData(self, data):
+        for subFolderName, folders in data.items():
+            if not isinstance(folders, list):
+                folders = [folders]
+            
+            yield subFolderName, folders
+
+    def linkedFolderNames(self):
+        """ Return a list of all the linked folder entries """
+        invalidKeys = c_schema.IGNORES_LINKED
+        names = []
+        for k, _ in self.data.items():
+            if k in invalidKeys:
+                continue
+            names.append(k)
+            
+        return names
+
+    def roots(self):
+        return self.data.get("ROOTS", {})
+
+    def parseRoots(self):
+        return self._parseData(self.data.get("ROOTS", {}))
+    
+    def parseBaseFolders(self):
+        return self._parseData(self.data.get("BASEFOLDERS", {}))
+    
+    def iterRoots(self):
+        """Generator to iter the roots entry in the dict.
+
+        Yields:
+            list
+        """
+        for root in self.data.get("ROOTS", {}).keys():
+            yield root
+
+    def _parseData(self, data):
+        """Mutates data to fill in anything that expects to reuse other key values.
+
+        Args:
+            data (dict):
+
+        Returns:
+            dict
+        """
+        for folderName, folderData in data.items():
+            logger.debug("folderName: %s folderData: %s", folderName, folderData)
+            if folderName in ("projectName", "projectPath", "configRoot"):
+                logger.debug("Skipping %s %s", folderName, folderData)
+                continue
+
+            # None, String, Dict
+            if folderData is None or folderData == "None":
+                logger.debug("Skipping %s %s", folderName, folderData)
+                continue
+
+            if isinstance(folderData, str):
+                logger.debug("Found subFolder name...")
+                d = self.data.get(folderData)
+                data[folderName] = self._parseData(d)
+
+        return data
+    
 def getConfigByFilePath(filepath):
     """
 
@@ -175,10 +207,9 @@ def getConfigFilepath(configName):
     if not configName:
         return None
 
-    if not frozen:
+    if not getattr(sys, "frozen", False):
         currentPath = os.path.dirname(__file__).replace("\\", "/")
-    elif frozen in ("dll", "console_exe", "windows_exe"):
-        # py2exe:
+    else:
         currentPath = os.path.dirname(sys.executable).replace("\\", "/")
 
     tokens = os.path.split(currentPath)

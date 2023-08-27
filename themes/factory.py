@@ -7,17 +7,17 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
-frozen = getattr(sys, "frozen", "")
-if not frozen:
-    PATH = os.path.dirname(__file__).replace("\\", "/")
-    ICONPATH = "{}/iconpacks".format(os.path.dirname(__file__).replace("\\", "/"))
-elif frozen in ("dll", "console_exe", "windows_exe"):
-    # py2exe:
-    PATH = "{}/themes".format(os.path.dirname(sys.executable).replace("\\", "/"))
-    ICONPATH = "{}/themes/iconpacks".format(
-        os.path.dirname(sys.executable).replace("\\", "/")
-    )
-
+def getPath():
+    if not getattr(sys, "frozen", ""):
+        PATH = os.path.dirname(__file__).replace("\\", "/")
+        ICONPATH = "{}/iconpacks".format(os.path.dirname(__file__).replace("\\", "/"))
+        return ICONPATH, PATH
+    else:
+        PATH = "{}/themes".format(os.path.dirname(sys.executable).replace("\\", "/"))
+        ICONPATH = "{}/themes/iconpacks".format(
+            os.path.dirname(sys.executable).replace("\\", "/")
+        )
+        return ICONPATH, PATH
 
 # https://www.w3schools.com/colors/colors_monochromatic.asp
 def loadTheme(
@@ -38,6 +38,7 @@ def loadTheme(
 ):
 
     # dirPath = f"{PATH}{os.path.sep}{name}".replace("\\", "/")
+    _, PATH = getPath()
     dirPath = "{}{}{}".format(PATH, os.path.sep, name).replace("\\", "/")
 
     lines = ""
@@ -74,6 +75,7 @@ def loadTheme(
 
 def fromJSON(themeName, themeColor):
     # dirPath = f"{PATH}{os.path.sep}{themeName}_{themeColor}"
+    _, PATH = getPath()
     dirPath = "{}{}{}_{}".format(PATH, os.path.sep, themeName, themeColor)
     if not themeColor:
         # dirPath = f"{PATH}{os.path.sep}{themeName}"
@@ -88,6 +90,7 @@ def fromJSON(themeName, themeColor):
 
 
 def toJSON(data, themeName, themeColor):
+    _, PATH = getPath()
     dirPath = "{}{}{}_{}".format(PATH, os.path.sep, themeName, themeColor)
     if not themeColor:
         dirPath = "{}{}{}".format(PATH, os.path.sep, themeName)

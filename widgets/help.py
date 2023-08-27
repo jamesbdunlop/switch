@@ -16,7 +16,7 @@ class HelpView(BaseWidget):
 
         self.setWindowTitle("Help:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-
+        self.setTheme((themeName, themeColor))
         self._mainLayout = QtWidgets.QVBoxLayout(self)
         htmlStr = (
             "<body>"

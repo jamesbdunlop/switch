@@ -1,4 +1,4 @@
-import os
+import os, sys
 import logging
 from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
@@ -7,6 +7,13 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
+def getIconPath():
+    if not getattr(sys, "frozen", False):
+        APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
+        return APP_ICONPATH
+    else:
+        APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
+        return APP_ICONPATH
 
 class IconMixin:
     def _fetchIcon(self, iconName):
@@ -18,7 +25,8 @@ class IconMixin:
         Returns:
             QIcon
         """
-        self._ICOPATHDIR = QtCore.QDir(st_factory.ICONPATH)
+        ICONPATH, _ = st_factory.getPath()
+        self._ICOPATHDIR = QtCore.QDir(ICONPATH)
         iconPath = os.path.join(
             self._ICOPATHDIR.path(), self.themeName, "{}.png".format(iconName)
         )

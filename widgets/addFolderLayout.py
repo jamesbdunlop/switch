@@ -43,7 +43,8 @@ class AddFolderLayout(BaseWidget):
     def _commit(self):
         name = str(self.nameInput.text())
         logger.debug("Creating subFolder layout: %s", name)
-        self.name.emit(name.upper())
+        # self.name.emit(name.upper())
+        self.name.emit(name)
 
 
 if __name__ == "__main__":

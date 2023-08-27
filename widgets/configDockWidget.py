@@ -24,6 +24,7 @@ class ConfigDockWidget(BaseDockWidget):
             themeName=themeName, themeColor=themeColor, parent=parent
         )
         self.setWindowTitle("Create Config:")
+        self.setObjectName("ConfigDockWidget")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
         self.widget = suiw_createSchema.CreateSchemaWidget(
