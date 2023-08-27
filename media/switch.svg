@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg194"
+   width="32"
+   height="32"
+   viewBox="0 0 32 32"
+   sodipodi:docname="switch.svg"
+   inkscape:export-filename="switch.ico.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   inkscape:version="1.2.2 (732a01da63, 2022-12-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs198">
+    <rect
+       x="10.047437"
+       y="38.139252"
+       width="113.8026"
+       height="57.618977"
+       id="rect3967" />
+  </defs>
+  <sodipodi:namedview
+     id="namedview196"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     showgrid="false"
+     inkscape:zoom="16"
+     inkscape:cx="14.0625"
+     inkscape:cy="9.28125"
+     inkscape:window-width="2002"
+     inkscape:window-height="1229"
+     inkscape:window-x="145"
+     inkscape:window-y="40"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="g200" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g200">
+    <path
+       style="fill:#b9af24;fill-opacity:1;stroke:#fffb09;stroke-width:0.267897"
+       d="M 1.4648514,2.317143 9.517023,2.375229 c 0,0 0.753268,2.5267487 2.07798,2.5267487 1.623785,0 18.286222,0.029043 18.286222,0.029043 0,0 1.298737,0 1.662383,1.4521544 0.363647,1.4521547 -0.05195,21.8984899 -0.05195,21.8984899 0,0 0.259748,0.929379 -0.831191,0.987465 -1.09094,0.05809 -29.455364,-0.232345 -29.455364,-0.232345 0,0 -0.88314151,0.174259 -0.88314151,-0.813206 0,-0.987465 -0.05195,-24.1638509 -0.05195,-24.1638509 0,0 0.103899,-1.7425854 1.19483841,-1.7425854 z"
+       id="path485"
+       sodipodi:nodetypes="ccscscscscc" />
+    <text
+       xml:space="preserve"
+       id="text3965"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:'Courier New';-inkscape-font-specification:'Courier New, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;shape-inside:url(#rect3967);fill:#000000;fill-opacity:1;stroke:#fffb09"
+       transform="translate(9.0221882,16.403979)"><tspan
+         x="10.046875"
+         y="152.70358"
+         id="tspan1745"><tspan
+           style="font-size:64px"
+           id="tspan1743">+</tspan></tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:8px;font-family:Arial;-inkscape-font-specification:'Arial, Heavy';fill:#000000;stroke:#fffb09;stroke-width:0;stroke-dasharray:none;font-weight:900;font-style:normal;font-stretch:normal;font-variant:normal;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal"
+       x="0.63808149"
+       y="24.900333"
+       id="text348"
+       transform="scale(0.86319283,1.1584897)"><tspan
+         sodipodi:role="line"
+         id="tspan346"
+         x="0.63808149"
+         y="24.900333"
+         style="font-style:normal;font-variant:normal;font-weight:900;font-stretch:normal;font-size:7.99999999px;font-family:Arial;-inkscape-font-specification:'Arial, Heavy';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1">SWITCH</tspan></text>
+  </g>
+</svg>

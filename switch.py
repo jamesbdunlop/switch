@@ -79,7 +79,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setObjectName("{}_mainWindow".format(APPNAAME))
         self.setWindowIcon(
             QtGui.QIcon(
-                QtCore.QDir(os.path.join(getIconPath(), "switch.ico")).absolutePath()
+                QtCore.QDir(os.path.join(getIconPath(), "switchIcon.ico")).absolutePath()
             )
         )
 
