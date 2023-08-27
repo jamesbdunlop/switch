@@ -40,7 +40,7 @@ DOCKTILE = "{} v{}".format(APPNAAME, VERS)
 
 
 def getIconPath():
-    if getattr(sys, "frozen", False):
+    if not getattr(sys, "frozen", False):
         APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
         return APP_ICONPATH
     else:

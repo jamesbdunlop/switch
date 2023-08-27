@@ -8,7 +8,7 @@ logger.propagate = False
 logging.basicConfig()
 
 def getCurrentPath():
-    if getattr(sys, "frozen", False):
+    if not getattr(sys, "frozen", False):
         currentPath = os.path.dirname(__file__).replace("\\", "/")
         return currentPath
     else:

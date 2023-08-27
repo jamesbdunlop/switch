@@ -207,7 +207,7 @@ def getConfigFilepath(configName):
     if not configName:
         return None
 
-    if getattr(sys, "frozen", False):
+    if not getattr(sys, "frozen", False):
         currentPath = os.path.dirname(__file__).replace("\\", "/")
     else:
         currentPath = os.path.dirname(sys.executable).replace("\\", "/")

@@ -8,7 +8,7 @@ logger.propagate = False
 logging.basicConfig()
 
 def getPath():
-    if getattr(sys, "frozen", False):
+    if not getattr(sys, "frozen", ""):
         PATH = os.path.dirname(__file__).replace("\\", "/")
         ICONPATH = "{}/iconpacks".format(os.path.dirname(__file__).replace("\\", "/"))
         return ICONPATH, PATH

@@ -1,4 +1,4 @@
-import os
+import os, sys
 import logging
 from PySide2 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
@@ -8,11 +8,10 @@ logger.propagate = False
 logging.basicConfig()
 
 def getIconPath():
-    if getattr(sys, "frozen", False):
+    if not getattr(sys, "frozen", False):
         APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
         return APP_ICONPATH
     else:
-        # py2exe:
         APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
         return APP_ICONPATH
 

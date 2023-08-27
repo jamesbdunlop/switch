@@ -4,6 +4,7 @@ from cx_Freeze import setup, Executable
 dataFiles = [
     "D:\\CODE\\Python\\jamesd\\switch\\configs",
     "D:\\CODE\\Python\\jamesd\\switch\\media",
+    "D:\\CODE\\Python\\jamesd\\switch\\themes",
     "D:\\CODE\\Python\\jamesd\\switch\\readme.md",
     "D:\\CODE\\Python\\jamesd\\switch\\switchIcon.ico",
 ]
