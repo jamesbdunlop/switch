@@ -145,7 +145,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             rootAction.triggered.connect(self._changeRootToSelected)
 
             openParentFolderAction = self.menu.addAction(
-                self._fetchIcon("iconmonstr-login-icon-256"), "Open Parent Folder"
+                self._fetchIcon("iconmonstr-login-icon-256"), "Explore to parent folder..."
             )
             openParentFolderAction.triggered.connect(self._openParentFolder)
 
