@@ -20,7 +20,7 @@ ____
 
 ## Making standalone switch.exe  
 ````
-python setup.py py2exe
+python setup.py build
 ````
 From the commandline inside the switch folder run the above command.<br> 
 This will build into the dist folder and you can run the switch.exe from there.
