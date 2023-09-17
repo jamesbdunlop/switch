@@ -144,6 +144,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.createFoldersButton = None
         # MAIN APP TOOLBAR
         self.toolbar = QtWidgets.QToolBar()
+        self.toolbar.setWindowTitle("mainToolBar")
         self.toolbar.setObjectName("mainToolBar")
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self._updateToolBarButtons()
@@ -203,7 +204,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         )
         customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
         self.themeChanged.connect(customBrowserWidget.setTheme)
-
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, customBrowserWidget)
         self._customBrowserDockWidgets.append(customBrowserWidget)
         if dir not in self._recentCustomBrowserPaths:
