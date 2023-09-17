@@ -36,7 +36,8 @@ VERS = "0.1.8"
 APPNAAME = "switch"
 WORKSPACENAME = "switchDock"
 WORKSPACEDOCKNAME = "{}WorkspaceControl".format(WORKSPACENAME)
-DOCKTILE = "{} v{}".format(APPNAAME, VERS)
+DOCKTILE = "{} v{} -dockWidget".format(APPNAAME, VERS)
+OBJECTNAME = "{}_mainWindow".format(APPNAAME)
 
 
 def getIconPath():
@@ -52,6 +53,7 @@ def getIconPath():
 class Switch(QtWidgets.QMainWindow, IconMixin):
     themeChanged = QtCore.Signal(list, name="themeChanged")
     configChanged = QtCore.Signal(ss_configManager.Config, name="configChanged")
+    _instance = None
 
     def __init__(self, themeName=None, themeColor=None, config=None, parent=None):
         """Creates the main ui layout for the app
@@ -76,7 +78,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.configDockWidget = None
 
         self.setWindowTitle("{} v{} : {}".format(APPNAAME, VERS, self.configPath))
-        self.setObjectName("{}_mainWindow".format(APPNAAME))
+        self.setObjectName(OBJECTNAME)
         self.setWindowIcon(
             QtGui.QIcon(
                 QtCore.QDir(os.path.join(getIconPath(), "switchIcon.ico")).absolutePath()
@@ -160,6 +162,15 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
         self.resize(600, 800)
 
+    def __new__(cls, themeName=None, themeColor=None, config=None, parent=None):
+        if cls._instance is None:
+            cls._instance = super(Switch, cls).__new__(cls)
+            cls._instance.themeName = themeName
+            cls._instance.themeColor = themeColor
+            cls._instance.config = config
+            cls._instance.parent = parent
+        return cls._instance
+    
     def _customBrowserWidgetExists(self, directoryPath):
         for widget in self._customBrowserDockWidgets:
             if widget.getDir() == directoryPath:
@@ -487,7 +498,6 @@ def getMayaDock():
     dock.show(dockable=True)
     return dock
 
-
 def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     """
 
@@ -501,13 +511,23 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
         qtapp (QApplication):
             App for splashScr
     """
+
     config = ss_configManager.getConfigByFilePath(filePath)
     logger.debug("config: %s", config)
 
     app = Switch(themeName=themeName, themeColor=themeColor, config=config)
     if insideMaya:
+        import shiboken2
+        
+        from maya.OpenMayaUI import MQtUtil as mqtutil
+        ptr = mqtutil.findWindow(OBJECTNAME)
+        # Find existing widget using mUtils .. cause singleton just refuses to work in maya regardless of approach
         dock = getMayaDock()
-        dock.layout.addWidget(app)
+        if ptr:
+            app = shiboken2.wrapInstance(int(ptr), QtWidgets.QWidget)
+            dock.layout.addWidget(app)
+        else:
+            dock.layout.addWidget(app)
         dock.show()
         app.show()
     else:
@@ -531,6 +551,8 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
         time.sleep(2.5)
         app.show()
         splashScr.finish(app)
+    
+    return app
 
 
 if __name__ == "__main__":
