@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
+
 def getPath():
     if not getattr(sys, "frozen", ""):
         PATH = os.path.dirname(__file__).replace("\\", "/")
@@ -18,6 +19,7 @@ def getPath():
             os.path.dirname(sys.executable).replace("\\", "/")
         )
         return ICONPATH, PATH
+
 
 # https://www.w3schools.com/colors/colors_monochromatic.asp
 def loadTheme(

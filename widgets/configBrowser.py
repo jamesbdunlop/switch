@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
+
 def getCurrentPath():
     if not getattr(sys, "frozen", False):
         currentPath = os.path.dirname(__file__).replace("\\", "/")
@@ -14,7 +15,8 @@ def getCurrentPath():
     else:
         currentPath = os.path.dirname(sys.executable).replace("\\", "/")
         return currentPath
-    
+
+
 class ConfigBrowser(QtWidgets.QFileDialog):
     def __init__(self, themeName, themeColor, toSave=False, parent=None):
         super(ConfigBrowser, self).__init__(parent=parent)

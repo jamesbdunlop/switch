@@ -7,6 +7,7 @@ logger = logging.getLogger(__name__)
 logger.propagate = False
 logging.basicConfig()
 
+
 def getIconPath():
     if not getattr(sys, "frozen", False):
         APP_ICONPATH = os.path.dirname(__file__).replace("\\", "/")
@@ -14,6 +15,7 @@ def getIconPath():
     else:
         APP_ICONPATH = "{}".format(os.path.dirname(sys.executable).replace("\\", "/"))
         return APP_ICONPATH
+
 
 class IconMixin:
     def _fetchIcon(self, iconName):

@@ -81,7 +81,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.setObjectName(OBJECTNAME)
         self.setWindowIcon(
             QtGui.QIcon(
-                QtCore.QDir(os.path.join(getIconPath(), "switchIcon.ico")).absolutePath()
+                QtCore.QDir(
+                    os.path.join(getIconPath(), "switchIcon.ico")
+                ).absolutePath()
             )
         )
 
@@ -171,7 +173,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             cls._instance.config = config
             cls._instance.parent = parent
         return cls._instance
-    
+
     def _customBrowserWidgetExists(self, directoryPath):
         for widget in self._customBrowserDockWidgets:
             if widget.getDir() == directoryPath:
@@ -476,6 +478,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
 
 if insideMaya:
+
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
             super(MayaDockWidget, self).__init__(parent=parent)
@@ -498,6 +501,7 @@ def getMayaDock():
     dock.show(dockable=True)
     return dock
 
+
 def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     """
 
@@ -518,8 +522,9 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
     app = Switch(themeName=themeName, themeColor=themeColor, config=config)
     if insideMaya:
         import shiboken2
-        
+
         from maya.OpenMayaUI import MQtUtil as mqtutil
+
         ptr = mqtutil.findWindow(OBJECTNAME)
         # Find existing widget using mUtils .. cause singleton just refuses to work in maya regardless of approach
         dock = getMayaDock()
@@ -551,7 +556,7 @@ def run(themeName=None, themeColor=None, filePath="", qtapp=None):
         time.sleep(2.5)
         app.show()
         splashScr.finish(app)
-    
+
     return app
 
 

@@ -1,7 +1,7 @@
 import os, sys
 import logging
 from dataclasses import dataclass
-from constants import schema as   c_schema
+from constants import schema as c_schema
 from PySide2 import QtCore
 import json
 
@@ -100,23 +100,23 @@ class Config:
     def getLinkedSubFolder(self, name):
         """Get a specific linked folder's value (dict)"""
         return self.data.get(name, {})
-        
+
     def iterLinkedSubFolderData(self, data):
         for subFolderName, folders in data.items():
             if not isinstance(folders, list):
                 folders = [folders]
-            
+
             yield subFolderName, folders
 
     def linkedFolderNames(self):
-        """ Return a list of all the linked folder entries """
+        """Return a list of all the linked folder entries"""
         invalidKeys = c_schema.IGNORES_LINKED
         names = []
         for k, _ in self.data.items():
             if k in invalidKeys:
                 continue
             names.append(k)
-            
+
         return names
 
     def roots(self):
@@ -124,10 +124,10 @@ class Config:
 
     def parseRoots(self):
         return self._parseData(self.data.get("ROOTS", {}))
-    
+
     def parseBaseFolders(self):
         return self._parseData(self.data.get("BASEFOLDERS", {}))
-    
+
     def iterRoots(self):
         """Generator to iter the roots entry in the dict.
 
@@ -163,7 +163,8 @@ class Config:
                 data[folderName] = self._parseData(d)
 
         return data
-    
+
+
 def getConfigByFilePath(filepath):
     """
 

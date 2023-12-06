@@ -43,7 +43,7 @@ class CreateSchemaWidget(BaseWidget):
             toolTip="PROJECTPATH/projectName/baseFolder/**schemaCreationHere \n PROJECTPATH should include the drive.",
         )
         mainPropertiesLayout.addLayout(gridlayout)
-        
+
         gridlayout, self._projectNameInput = createLabeledInput(
             "{:18}".format("projectName"),
             "Type the name of your project here. eg: anycubicUltra",
@@ -101,7 +101,7 @@ class CreateSchemaWidget(BaseWidget):
         self._mainLayout.addWidget(scroller)
 
         self.resize(1400, 600)
-    
+
     def _createPreview(self):
         data = self._parseTreeData()
         config = ss_configManager.Config(data)
@@ -146,7 +146,7 @@ class CreateSchemaWidget(BaseWidget):
             logger.error(msg)
             errorWidget("Warning:", msg)
             return
-        
+
         data = self.schemaTree._parseTreeToData()
         data["projectName"] = projName
         data["projectPath"] = projPath
@@ -174,7 +174,7 @@ class CreateSchemaWidget(BaseWidget):
         extensions = config.data.get("validExt", "")
         extStr = ""
         for idx, n in enumerate(extensions):
-            if idx == len(extensions)-1:
+            if idx == len(extensions) - 1:
                 extStr += n
             else:
                 extStr += "%s, " % n
@@ -185,7 +185,9 @@ class CreateSchemaWidget(BaseWidget):
 
 
 class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
-    def __init__(self, themeName, themeColor, asPreview=False, config=None, parent=None):
+    def __init__(
+        self, themeName, themeColor, asPreview=False, config=None, parent=None
+    ):
         QtWidgets.QTreeWidget.__init__(self, parent=parent)
         ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
         self.setWindowTitle("Schema Create....")
@@ -202,19 +204,22 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
 
         self.previousValue = None
         self.asPreview = asPreview
-        self._config = config if config is not None else ss_configManager.Config(data=c_schema.EMPTY_CONFIG_DATA)
-        
+        self._config = (
+            config
+            if config is not None
+            else ss_configManager.Config(data=c_schema.EMPTY_CONFIG_DATA)
+        )
+
         self.createTreeProjectRoot()
         self.createTreeSchemaRoots()
         self.createTreeSchemaBases()
         if not self.asPreview:
             self.createTreeSchemaLinked()
 
-   
     ### SETTERS / GETTERS
     def config(self):
         return self._config
-    
+
     def setConfig(self, config):
         self._config = config
         self.clear()
@@ -228,7 +233,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
 
     def configRootName(self):
         return self._projectRoot.text(0)
-    
+
     def setConfigRootName(self, name):
         self._projectRoot.setText(0, name)
 
@@ -239,20 +244,23 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         self.createTreeSchemaLinked()
 
     def _customRCMenu(self, *args):
-        """ Creates the right click menu """
+        """Creates the right click menu"""
         self._menu = QtWidgets.QMenu(self)
         currentItem = self.currentItem()
         # We leave all rootFolders alone as they have a single dynAsset under them
         rowName = currentItem.text(0)
-        if self._isRootFolderItem(currentItem) or rowName == 'None':
+        if self._isRootFolderItem(currentItem) or rowName == "None":
             removeAction = self._menu.addAction("Remove Subfolder")
             removeAction.triggered.connect(self._removeSubfolder)
 
-        if rowName != 'None' and not self._isRootFolderItem(currentItem):
+        if rowName != "None" and not self._isRootFolderItem(currentItem):
             addAction = self._menu.addAction("Add Folder")
             addAction.triggered.connect(self._addSubfolderPopUp)
-            
-            if not self._isTopLevelItem(currentItem) and currentItem.text(0) != c_schema.DYN_ASSET_NAME:
+
+            if (
+                not self._isTopLevelItem(currentItem)
+                and currentItem.text(0) != c_schema.DYN_ASSET_NAME
+            ):
                 removeAction = self._menu.addAction("Remove Folder")
                 removeAction.triggered.connect(self._removeSubfolder)
 
@@ -264,7 +272,9 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                     if currentItem.text(0) in self.config().linkedFolderNames():
                         parentLinkedSubFolderName = currentItem.text(0)
                     else:
-                        parentLinkedSubFolderName = self._getLinkedParentName(currentItem)
+                        parentLinkedSubFolderName = self._getLinkedParentName(
+                            currentItem
+                        )
 
                     for linkedFolderName in self.config().linkedFolderNames():
                         invalid = False
@@ -294,7 +304,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             if child.text(0) == name:
                 return True
         return False
-    
+
     def _getLinkedSubFolderTWI(self, name):
         for twi in self.iterLinkedSubFolderItems():
             if twi.text(0) == name:
@@ -305,7 +315,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         topLvlCount = self.topLevelItemCount()
         for x in range(topLvlCount):
             yield self.topLevelItem(x)
-    
+
     def iterRootItems(self):
         # Find the actual projectRoot, then iter for it's children
         # ignoring the linkedFolder entries.
@@ -315,7 +325,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             childCount = tli.childCount()
             for idx in range(childCount):
                 yield tli.child(idx)
-    
+
     def iterBaseItems(self):
         # Children of the dynamic asset entries for all roots.
         for rootItem in self.iterRootItems():
@@ -329,7 +339,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         for tli in self.iterTopLevelItems():
             if tli.text(0) != c_schema.SUBFOLDER_TITLE_NAME:
                 continue
-            
+
             childCount = tli.childCount()
             for idx in range(childCount):
                 yield tli.child(idx)
@@ -338,7 +348,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         childCount = twi.childCount()
         if not childCount:
             yield twi
-        
+
         for idx in range(childCount):
             child = twi.child(idx)
             yield child
@@ -347,7 +357,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             if subChildCount:
                 for c in self.iterHrc(child):
                     yield c
-        
+
     ## INTERNAL GETTERS
     def _isTopLevelItem(self, twi):
         allToLevelItems = list(self.iterTopLevelItems())
@@ -356,7 +366,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     def _isRootFolderItem(self, twi):
         allRootItems = list(self.iterRootItems())
         return twi in allRootItems
-    
+
     def _isBaseFolderItem(self, twi):
         allBaseItems = list(self.iterBaseItems())
         return twi in allBaseItems
@@ -364,13 +374,13 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     def _isSubFolderTopLevelItem(self, twi):
         if twi.text(0) == c_schema.SUBFOLDER_TITLE_NAME:
             return True
-        
+
         return False
-    
+
     def _isLinkedSubFolderItem(self, twi):
         allLinkedItems = self.iterLinkedSubFolderItems()
         return twi in allLinkedItems
-    
+
     def _isLinkedSubFolderItemName(self, twiName):
         allLinkedItemNames = [n.text(0) for n in self.iterLinkedSubFolderItems()]
         return twiName in allLinkedItemNames
@@ -392,17 +402,17 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
 
     ## MUTATE TREE
     def createTreeProjectRoot(self):
-        """ Create the top level root item and set an invalid name, this will be updated on refresh. """
+        """Create the top level root item and set an invalid name, this will be updated on refresh."""
         if not self.isValidConfig():
             return
         self._projectRoot = QtWidgets.QTreeWidgetItem()
         self._projectRoot.setText(0, c_schema.INVALID_ROOTNAME)
         self.addTopLevelItem(self._projectRoot)
-    
+
     def createTreeSchemaRoots(self):
         if not self.isValidConfig():
             return
-        
+
         for rootName in self.config().iterRoots():
             rootTWI = QtWidgets.QTreeWidgetItem()
             rootTWI.setText(0, rootName)
@@ -410,11 +420,11 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
 
             ## TEMP ASSET NAME - READ ONLY as this changes on creation in the main UI
             self._createReadOnlyDynamicEntry(rootTWI)
-    
+
     def createTreeSchemaBases(self):
         if not self.isValidConfig():
             return
-        
+
         def expandLinkedFolders(twi, folderName):
             data = self.config().getLinkedSubFolder(folderName)
             for parentFolderName, subFolders in data.items():
@@ -424,7 +434,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                     parentTWI = QtWidgets.QTreeWidgetItem()
                     parentTWI.setText(0, parentFolderName)
                     twi.addChild(parentTWI)
-                
+
                 for subFolder in subFolders:
                     if subFolder in self.config().linkedFolderNames():
                         expandLinkedFolders(parentTWI, subFolder)
@@ -449,8 +459,11 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                 for childName in linkedData:
                     if childName == None or childName == str(None):
                         continue
-                    
-                    if self.asPreview and childName in self.config().linkedFolderNames():
+
+                    if (
+                        self.asPreview
+                        and childName in self.config().linkedFolderNames()
+                    ):
                         expandLinkedFolders(baseTWI, childName)
                     else:
                         # just show the linked name
@@ -462,7 +475,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         subFolderTLI = QtWidgets.QTreeWidgetItem()
         subFolderTLI.setText(0, c_schema.SUBFOLDER_TITLE_NAME)
         self.addTopLevelItem(subFolderTLI)
-        
+
         for linkedIdName in self.config().linkedFolderNames():
             # PARENT LINKED FOLDER NAME
             if linkedIdName == None or linkedIdName == str(None):
@@ -470,7 +483,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             subFolderRoot = QtWidgets.QTreeWidgetItem()
             subFolderRoot.setText(0, linkedIdName)
             subFolderTLI.addChild(subFolderRoot)
-            
+
             # CHILD FOLDERS AND THEIR LINKS/FOLDERS
             data = self.config().getLinkedSubFolder(linkedIdName)
             for subFolderName, folders in self.config().iterLinkedSubFolderData(data):
@@ -487,7 +500,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                     subFolder.addChild(linkedFolder)
 
     def _createReadOnlyDynamicEntry(self, parent):
-        """ Creates the dynamic asset entry that would be created by the user adding a folder via the ui."""
+        """Creates the dynamic asset entry that would be created by the user adding a folder via the ui."""
         dynamicAssetTWI = QtWidgets.QTreeWidgetItem()
         dynamicAssetTWI.setText(0, c_schema.DYN_ASSET_NAME)
         parent.addChild(dynamicAssetTWI)
@@ -503,20 +516,20 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     def _addToMatchingBaseFolder(self, currentItem, folderName):
         if self._isLinkedSubFolderChild(currentItem):
             return
-        
+
         for eachItem in self._findTreeWidgetItemsByName(currentItem.text(0)):
             if eachItem == currentItem:
                 continue
-            
+
             if self._childExists(eachItem, folderName):
                 return
-            
+
             dupChild = QtWidgets.QTreeWidgetItem()
             dupChild.setText(0, folderName)
             eachItem.addChild(dupChild)
 
     def _addSubfolderByName(self, folderName):
-        """Add child of name to the self.currentItem() row. 
+        """Add child of name to the self.currentItem() row.
 
         Args:
             folderName (string): String name for the folder
@@ -526,7 +539,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             folderName = folderName.upper()
         child = QtWidgets.QTreeWidgetItem()
         child.setText(0, folderName)
-        
+
         self.currentItem().addChild(child)
 
         isTopLvl = self._isTopLevelItem(self.currentItem())
@@ -535,23 +548,23 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         self._addToMatchingBaseFolder(self.currentItem(), folderName)
 
     def _addSubfolderPopUp(self):
-        """ Fire the UI to enter a new folder name """
+        """Fire the UI to enter a new folder name"""
         # We don't ever add to a None entry!!
-        if self.currentItem().text(0) == 'None':
+        if self.currentItem().text(0) == "None":
             return
-        
+
         folderName = AddFolderLayout(self.themeName, self.themeColor)
         folderName.show()
         folderName.name.connect(self._addSubfolderByName)
-    
+
     def _addLinked(self, folderSchemaName):
         # We don't ever add to a None entry!!
-        if self.currentItem().text(0) == 'None':
+        if self.currentItem().text(0) == "None":
             return
-        
+
         if self._childExists(self.currentItem(), folderSchemaName):
             return
-        
+
         child = QtWidgets.QTreeWidgetItem()
         child.setText(0, folderSchemaName)
         self.currentItem().addChild(child)
@@ -560,9 +573,13 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     ## UI STUFF
     def mouseDoubleClickEvent(self, e):
         selectedRow = self.currentItem()
-        if self._isTopLevelItem(selectedRow) or selectedRow is None or selectedRow.text(0) in c_schema.READ_ONLY_NAMES:
+        if (
+            self._isTopLevelItem(selectedRow)
+            or selectedRow is None
+            or selectedRow.text(0) in c_schema.READ_ONLY_NAMES
+        ):
             return
-        
+
         self.previousValue = selectedRow.text(0)
         self.openPersistentEditor(selectedRow, 0)
 
@@ -574,12 +591,12 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                     self.closePersistentEditor(child)
                     for existing in self._findTreeWidgetItemsByName(self.previousValue):
                         existing.setText(0, self.previousValue)
-                        
+
                 closeAllChildEditors(child)
 
         for tlwi in self.iterTopLevelItems():
             closeAllChildEditors(tlwi)
-        
+
     def _findTreeWidgetItemsByName(self, itemName, ignoreLinked=True):
         # My own search cause the self.findItems finds nothing. GRRR
         def iterChildren(twi, found):
@@ -588,19 +605,18 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                 childItem = twi.child(idx)
                 if childItem.text(0) == itemName:
                     found.append(childItem)
-                
+
                 iterChildren(childItem, found)
             return found
-                
-       
+
         found = []
         for tlwi in self.iterTopLevelItems():
             if ignoreLinked and tlwi.text(0) == c_schema.SUBFOLDER_TITLE_NAME:
                 continue
-            
+
             iterChildren(tlwi, found)
             return found
-        
+
         return found
 
     ## TREE TO DATA
@@ -620,7 +636,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
 
     def _parseLinkedFolders(self, data):
         def parseLinkedChildren(linkedSubFolder, data):
-            childCount = linkedSubFolder.childCount()          
+            childCount = linkedSubFolder.childCount()
             for idx in range(childCount):
                 child = linkedSubFolder.child(idx)
                 subFolders = []
@@ -633,9 +649,9 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         for linkedSubFolder in self.iterLinkedSubFolderItems():
             data[linkedSubFolder.text(0)] = {}
             parseLinkedChildren(linkedSubFolder, data[linkedSubFolder.text(0)])
-            
+
     def _parseTreeToData(self):
-        """ Iter the tree widget and construct a dict for use with the Config """
+        """Iter the tree widget and construct a dict for use with the Config"""
         data = {}
         self._parseRoots(data)
         self._parseBaseFolders(data)

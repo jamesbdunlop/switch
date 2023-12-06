@@ -14,6 +14,11 @@ setup(
     version="0.1.0",
     author="James B Dunlop",
     author_email="james@anim83d.com",
-    executables= [Executable("switch.py", icon="switchIcon.ico", base = "Win32GUI")],
-    options = {'build_exe': {'include_files':dataFiles, "silent":True,}},
+    executables=[Executable("switch.py", icon="switchIcon.ico", base="Win32GUI")],
+    options={
+        "build_exe": {
+            "include_files": dataFiles,
+            "silent": True,
+        }
+    },
 )
