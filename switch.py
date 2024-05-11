@@ -195,7 +195,6 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
                 QtWidgets.QFileDialog.ShowDirsOnly
                 | QtWidgets.QFileDialog.DontResolveSymlinks,
             )
-            dir.setStyleSheet(self.sheet)
             if not dir:
                 return
 
