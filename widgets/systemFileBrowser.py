@@ -122,6 +122,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             )
             confirm.setStyleSheet(self.sheet)
             if confirm.exec_() == QtWidgets.QMessageBox.Ok:
+                rootPath = rootPath.path()
                 self._dir.mkpath(rootPath)
                 for root in self.config.roots():
                     self._dir.mkpath(os.path.sep.join([rootPath, root]))

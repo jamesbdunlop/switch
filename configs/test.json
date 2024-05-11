@@ -1,1 +1,41 @@
-{"ROOTS": {"root01": null, "root02": null, "rootTest": null}, "BASEFOLDERS": {"base01": ["LINKED02"], "base02": [], "baseTest": []}, "LINKED01": {"withSupports": [null]}, "LINKED02": {"LINKED03": [null]}, "LINKED03": {"objs": [null], "maya": [null], "stl": [null]}, "projectName": "Test", "projectPath": "E:\\", "configRoot": "Test", "validExt": [""]}
+{
+    "ROOTS": {
+        "root01": null,
+        "root02": null,
+        "rootTest": null
+    },
+    "BASEFOLDERS": {
+        "base01": [
+            "LINKED02"
+        ],
+        "base02": [],
+        "baseTest": []
+    },
+    "LINKED01": {
+        "withSupports": [
+            null
+        ]
+    },
+    "LINKED02": {
+        "LINKED03": [
+            null
+        ]
+    },
+    "LINKED03": {
+        "objs": [
+            null
+        ],
+        "maya": [
+            null
+        ],
+        "stl": [
+            null
+        ]
+    },
+    "projectName": "temp",
+    "projectPath": "C:\\",
+    "configRoot": "SwitchTestProject",
+    "validExt": [
+        ""
+    ]
+}
