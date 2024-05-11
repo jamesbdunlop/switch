@@ -17,10 +17,10 @@ class ThemeEditorDockWidget(BaseDockWidget):
         super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Edit Theme:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setTheme((themeName, themeColor))
+
         self.widget = BaseWidget(themeName=themeName, themeColor=themeColor)
-        self.widget.setTheme((themeName, themeColor))
         self.mainLayout = QtWidgets.QVBoxLayout(self.widget)
+        # self.widget.setTheme((themeName, themeColor))
 
         data = t_factory.fromJSON(self.themeName, self.themeColor)
         self._data = {}
@@ -38,13 +38,17 @@ class ThemeEditorDockWidget(BaseDockWidget):
                         input.setCurrentText(f)
                         break
 
+                input.currentIndexChanged.connect(self._localThemeChange)
+
             elif entry.endswith("Size"):
                 input = QtWidgets.QSpinBox()
                 input.setValue(int(value.replace("px", "")))
+                input.valueChanged.connect(self._localThemeChange)
 
             elif entry.endswith("Color"):
                 input = QtWidgets.QLineEdit()
                 input.setText(value)
+                input.textChanged.connect(self._localThemeChange)
 
                 colorPicker = QtWidgets.QPushButton("Pick")
                 colorPicker.clicked.connect(partial(self._changeColor, input))
@@ -64,6 +68,7 @@ class ThemeEditorDockWidget(BaseDockWidget):
                 colorPicker = QtWidgets.QPushButton("Pick")
                 colorPicker.clicked.connect(partial(self._changeColor, input))
                 subLayout.addWidget(colorPicker)
+                input.textChanged.connect(self._localThemeChange)
             else:
                 input = QtWidgets.QLineEdit()
                 input.setText(value)
@@ -93,8 +98,15 @@ class ThemeEditorDockWidget(BaseDockWidget):
         self.w.setCurrentColor(input.text())
         self.w.exec_()
         input.setText(str(self.w.currentColor().name()))
+        self._localThemeChange()
 
-    def _saveConfig(self):
+    def _localThemeChange(self):
+        data = self._processConfig()
+        sheet = t_factory.loadTheme(self.themeName, data)
+        self.setStyleSheet(sheet)
+        self.widget.setStyleSheet(sheet)
+
+    def _processConfig(self):
         data = {}
         for k, v in self._data.items():
             if k == "fontFamily":
@@ -103,7 +115,10 @@ class ThemeEditorDockWidget(BaseDockWidget):
                 data[k] = "{}px".format(v.value())
             else:
                 data[k] = v.text()
+        return data
 
+    def _saveConfig(self):
+        data = self._processConfig()
         t_factory.toJSON(data, self.themeName, self.themeColor)
         self.themeChanged.emit(True)
         self.setTheme((self.themeName, self.themeColor))
