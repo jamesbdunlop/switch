@@ -1,6 +1,6 @@
 import sys
 import logging
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from functools import partial
 from constants import schema as c_schema
 from services import configManger as ss_configManager
@@ -18,10 +18,11 @@ logging.basicConfig()
 
 
 class CreateSchemaWidget(BaseWidget):
+    themeChanged = QtCore.Signal(list, name="themeChanged")
+
     def __init__(self, themeName, themeColor, parent=None):
-        super(CreateSchemaWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+
         self.setWindowTitle("Schema Folder Creator")
         self.setObjectName("SchemaFolderCreator")
         self.setTheme([themeName, themeColor])
@@ -31,7 +32,8 @@ class CreateSchemaWidget(BaseWidget):
         self._mainLayout = QtWidgets.QVBoxLayout(self)
 
         # Always add ROOTS and SCHEMA
-        self.schemaTree = SchemaTreeWidget(self.themeName, self.themeColor)
+        self.schemaTree = SchemaTreeWidget()
+        self.themeChanged.connect(self.schemaTree.setTheme)
 
         mainPropertiesWidget = QtWidgets.QGroupBox()
         mainPropertiesWidget.setTitle("Project Data:")
@@ -105,10 +107,10 @@ class CreateSchemaWidget(BaseWidget):
     def _createPreview(self):
         data = self._parseTreeData()
         config = ss_configManager.Config(data)
-        self.previewUI = SchemaTreeWidget(
-            themeName="core", themeColor="", asPreview=True, config=config, parent=None
-        )
+        self.previewUI = SchemaTreeWidget(asPreview=True, config=config, parent=None)
         self.previewUI.setConfigRootName(config.configRoot())
+        self.previewUI.setTheme([self.themeName, self.themeColor])
+        self.themeChanged.connect(self.previewUI.setTheme)
         self.previewUI.show()
 
     def _saveSchema(self):
@@ -183,18 +185,18 @@ class CreateSchemaWidget(BaseWidget):
         self.schemaTree.setConfig(config)
         self.schemaTree._refresh()
 
+    def setTheme(self, theme):
+        super().setTheme(theme)
+        self.themeChanged.emit(theme)
+
 
 class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
-    def __init__(
-        self, themeName, themeColor, asPreview=False, config=None, parent=None
-    ):
-        QtWidgets.QTreeWidget.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+    def __init__(self, asPreview=False, config=None, parent=None):
+        super().__init__(parent=parent)
+
         self.setWindowTitle("Schema Create....")
         self.setObjectName("SchemaTreeWidget")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setTheme([themeName, themeColor])
-        self.setStyleSheet(self.sheet)
         self.setColumnCount(1)
         self.setHeaderLabels(["Folder Schema"])
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -657,6 +659,9 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         self._parseBaseFolders(data)
         self._parseLinkedFolders(data)
         return data
+
+    def setTheme(self, theme):
+        super().setTheme(theme)
 
 
 if __name__ == "__main__":

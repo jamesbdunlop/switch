@@ -1,6 +1,6 @@
 import logging, sys
 from functools import partial
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseWidget as BaseWidget
 from widgets.base import BaseDockWidget as BaseDockWidget
 from themes import factory as t_factory
@@ -14,9 +14,7 @@ class ThemeEditorDockWidget(BaseDockWidget):
     themeChanged = QtCore.Signal(bool, name="configChanged")
 
     def __init__(self, themeName, themeColor, parent=None):
-        super(ThemeEditorDockWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Edit Theme:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setTheme((themeName, themeColor))

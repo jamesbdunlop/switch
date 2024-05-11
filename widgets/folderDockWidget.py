@@ -1,5 +1,5 @@
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from functools import partial
 from widgets.base import BaseWidget as BaseWidget
 from widgets.base import BaseDockWidget as BaseDockWidget
@@ -14,9 +14,7 @@ class FolderDockWidget(BaseDockWidget):
     closed = QtCore.Signal(bool, name="closed")
 
     def __init__(self, themeName, themeColor, config=None, parent=None):
-        super(FolderDockWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Create Folders:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 

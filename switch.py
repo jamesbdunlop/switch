@@ -4,7 +4,7 @@ import sys, os
 import logging
 import time
 from functools import partial
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
 from widgets.base import IconMixin
 from widgets.help import HelpView
@@ -62,7 +62,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             config (Config):
             parent (QtWidget):
         """
-        super(Switch, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self._settings = QtCore.QSettings("JBD", "{}_settings".format(APPNAAME))
         self._recentConfigs = list()
         self._recentFilepaths = list()
@@ -195,6 +195,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
                 QtWidgets.QFileDialog.ShowDirsOnly
                 | QtWidgets.QFileDialog.DontResolveSymlinks,
             )
+            dir.setStyleSheet(self.sheet)
             if not dir:
                 return
 
@@ -205,11 +206,12 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             themeName=self.themeName, themeColor=self.themeColor, dir=dir
         )
         customBrowserWidget.closed.connect(self._customDockWidgetRemoved)
-        self.themeChanged.connect(customBrowserWidget.setTheme)
         self.addDockWidget(QtCore.Qt.RightDockWidgetArea, customBrowserWidget)
         self._customBrowserDockWidgets.append(customBrowserWidget)
         if dir not in self._recentCustomBrowserPaths:
             self._recentCustomBrowserPaths.append(dir)
+
+        self.themeChanged.connect(customBrowserWidget.setTheme)
 
     def _editTheme(self):
         self.editThemeUI = ThemeEditorDockWidget(
@@ -237,6 +239,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
 
     def _showHelp(self):
         self.helpUI = HelpView(self.themeName, self.themeColor)
+        self.themeChanged.connect(self.helpUI.setTheme)
         self.helpUI.show()
 
     def _updateToolBarButtons(self):
@@ -297,7 +300,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             self.configDockWidget = ConfigDockWidget(self.themeName, self.themeColor)
             self.configDockWidget.setFloating(True)
             self.configDockWidget.resize(800, 600)
+
             self.themeChanged.connect(self.configDockWidget.setTheme)
+
             self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.configDockWidget)
         else:
             self.configDockWidget.show()
@@ -481,7 +486,7 @@ if insideMaya:
 
     class MayaDockWidget(mag_mayaMixin.MayaQWidgetDockableMixin, QtWidgets.QWidget):
         def __init__(self, parent=None):
-            super(MayaDockWidget, self).__init__(parent=parent)
+            super().__init__(parent=parent)
             self.setObjectName(WORKSPACENAME)
             self.setWindowTitle(DOCKTILE)
             self.layout = QtWidgets.QVBoxLayout(self)
@@ -577,4 +582,4 @@ if __name__ == "__main__":
     qtapp.setOrganizationName("James B Dunlop")
 
     run(themeName=None, themeColor=None, filePath=lastOpened, qtapp=qtapp)
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

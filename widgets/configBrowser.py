@@ -1,6 +1,6 @@
 import os, sys
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from themes import factory as st_factory
 
 logger = logging.getLogger(__name__)
@@ -19,7 +19,7 @@ def getCurrentPath():
 
 class ConfigBrowser(QtWidgets.QFileDialog):
     def __init__(self, themeName, themeColor, toSave=False, parent=None):
-        super(ConfigBrowser, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         if toSave:
             self.setAcceptMode(QtWidgets.QFileDialog.AcceptSave)

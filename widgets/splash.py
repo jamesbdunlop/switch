@@ -1,5 +1,5 @@
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from widgets.base import BaseWidget as BaseWidget
 
 logger = logging.getLogger(__name__)
@@ -14,4 +14,4 @@ class SplashWidget(QtWidgets.QSplashScreen):
         pixmap=None,
         f=QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.FramelessWindowHint,
     ) -> None:
-        super(SplashWidget, self).__init__(parent=parent, pixmap=pixmap, f=f)
+        super().__init__(parent=parent, pixmap=pixmap, f=f)

@@ -1,7 +1,7 @@
 import os, shutil
 import logging
 import shutil
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from widgets.base import BaseTreeViewWidget
 from services import archiveManager as ss_archiveManager
 from functools import partial
@@ -21,7 +21,7 @@ logging.basicConfig()
 
 class Proxy(QtCore.QSortFilterProxyModel):
     def __init__(self, parent=None):
-        QtCore.QSortFilterProxyModel.__init__(self, parent=parent)
+        super().__init__(parent=parent)
 
     def lessThan(self, left, right):
         leftData = self.sourceModel().data(left, QtCore.Qt.ItemDataRole.DisplayRole)
@@ -54,9 +54,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
     fileOpened = QtCore.Signal(str, name="fileOpened")
 
     def __init__(self, config, themeName, themeColor, parent=None):
-        super(SystemFileBrowser, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self._settings = QtCore.QSettings("JBD", "switch_settings")
         self.config = config
         self.archiveFolderPath = None
@@ -535,9 +533,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
 
 class CustomFileBrowser(BaseTreeViewWidget):
     def __init__(self, rootDir, themeName, themeColor, parent=None):
-        super(CustomFileBrowser, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self._dir = QtCore.QDir()
         self._model = QtWidgets.QFileSystemModel()
         self.setSortingEnabled(True)

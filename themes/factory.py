@@ -1,7 +1,7 @@
 import logging
 import os, sys
 import json
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 logger = logging.getLogger(__name__)
 logger.propagate = False

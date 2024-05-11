@@ -1,5 +1,5 @@
 import logging
-from PySide2 import QtCore, QtWidgets
+from PySide6 import QtCore, QtWidgets
 from widgets.base import BaseDockWidget as BaseDockWidget, IconMixin
 from widgets import systemFileBrowser as suiw_systemBrowser
 
@@ -19,9 +19,7 @@ class CustomBrowserDockWidget(BaseDockWidget, IconMixin):
             themeColor (string):
             parent QtWiget:
         """
-        super(CustomBrowserDockWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self._dirPath = dir
         self.setWindowTitle(dir)
         self.setObjectName(dir)
@@ -45,19 +43,9 @@ class CustomBrowserDockWidget(BaseDockWidget, IconMixin):
         tbLayout.addWidget(tbclose)
 
         self.setTitleBarWidget(tbWidget)
-        self.setTheme((self.themeName, self.themeColor))
 
     def getDir(self):
         return self._dirPath
-
-    def setTheme(self, theme):
-        """
-
-        Args:
-            theme (list[themeName, themeColor]):
-        """
-        super(CustomBrowserDockWidget, self).setTheme(theme)
-        self.widget().setTheme(theme)
 
     def closeEvent(self, event):
         self.closed.emit(self.getDir())

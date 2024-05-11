@@ -1,5 +1,5 @@
 import logging
-from PySide2 import QtCore
+from PySide6 import QtCore
 from widgets import createSchema as suiw_createSchema
 from widgets.base import BaseDockWidget as BaseDockWidget
 
@@ -9,6 +9,7 @@ logging.basicConfig()
 
 
 class ConfigDockWidget(BaseDockWidget):
+    themeChanged = QtCore.Signal(list, name="themeChanged")
     commit = QtCore.Signal(list, name="commit")
     closed = QtCore.Signal(bool, name="closed")
 
@@ -20,23 +21,17 @@ class ConfigDockWidget(BaseDockWidget):
             themeColor:
             parent:
         """
-        super(ConfigDockWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Create Config:")
         self.setObjectName("ConfigDockWidget")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
-        self.widget = suiw_createSchema.CreateSchemaWidget(
+        self.w = suiw_createSchema.CreateSchemaWidget(
             themeName=themeName, themeColor=themeColor
         )
-        self.setWidget(self.widget)
+        self.setWidget(self.w)
+        self.themeChanged.connect(self.w.setTheme)
 
     def setTheme(self, theme):
-        """
-
-        Args:
-            theme (list[themeName, themeColor]):
-        """
-        super(ConfigDockWidget, self).setTheme(theme)
-        self.widget().setTheme(theme)
+        super().setTheme(theme)
+        self.themeChanged.emit(theme)

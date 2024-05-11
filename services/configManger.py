@@ -2,7 +2,7 @@ import os, sys
 import logging
 from dataclasses import dataclass
 from constants import schema as c_schema
-from PySide2 import QtCore
+from PySide6 import QtCore
 import json
 
 logger = logging.getLogger(__name__)
@@ -134,6 +134,9 @@ class Config:
         Yields:
             list
         """
+        if self.data is None:
+            return
+
         for root in self.data.get("ROOTS", {}).keys():
             yield root
 
