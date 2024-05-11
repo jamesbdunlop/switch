@@ -11,16 +11,16 @@ logging.basicConfig()
 
 
 class ThemeEditorDockWidget(BaseDockWidget):
-    themeChanged = QtCore.Signal(bool, name="configChanged")
+    themeEdited = QtCore.Signal(bool, name="themeEdited")
+    tempThemeChanged = QtCore.Signal((str, str), name="tempThemeChanged")
 
     def __init__(self, themeName, themeColor, parent=None):
         super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Edit Theme:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
-        self.widget = BaseWidget(themeName=themeName, themeColor=themeColor)
-        self.mainLayout = QtWidgets.QVBoxLayout(self.widget)
-        # self.widget.setTheme((themeName, themeColor))
+        self.bw = BaseWidget(themeName=themeName, themeColor=themeColor)
+        self.mainLayout = QtWidgets.QVBoxLayout(self.bw)
 
         data = t_factory.fromJSON(self.themeName, self.themeColor)
         self._data = {}
@@ -87,24 +87,35 @@ class ThemeEditorDockWidget(BaseDockWidget):
         self.mainLayout.addWidget(self.saveConfigButton)
         self.mainLayout.addWidget(self.cancelButton)
 
-        self.setWidget(self.widget)
-        self.widget.resize(100, 400)
+        self.setWidget(self.bw)
+        self.bw.resize(100, 400)
         self.resize(100, 400)
 
         self.mainLayout.addStretch(1)
+        self._origThemeName = self.themeName
+        self._origThemeColor = self.themeColor
 
     def _changeColor(self, input):
         self.w = QtWidgets.QColorDialog()
+        self.w.setWindowFlags(
+            self.w.windowFlags() | QtCore.Qt.Dialog | QtCore.Qt.WindowStaysOnTopHint
+        )
         self.w.setCurrentColor(input.text())
         self.w.exec_()
         input.setText(str(self.w.currentColor().name()))
         self._localThemeChange()
 
     def _localThemeChange(self):
+        # Fetch the data from the UI
         data = self._processConfig()
-        sheet = t_factory.loadTheme(self.themeName, data)
-        self.setStyleSheet(sheet)
-        self.widget.setStyleSheet(sheet)
+        # Dump to disk
+        tmpThemeName = "core"
+        tmpThemeColor = "tempTheme"
+        t_factory.toJSON(data, tmpThemeName, tmpThemeColor)
+        # Emit to the main UI to use that config.
+        self.tempThemeChanged.emit(tmpThemeName, tmpThemeColor)
+        self.bw.setTheme((tmpThemeName, tmpThemeColor))
+        self.setTheme((tmpThemeName, tmpThemeColor))
 
     def _processConfig(self):
         data = {}
@@ -119,10 +130,19 @@ class ThemeEditorDockWidget(BaseDockWidget):
 
     def _saveConfig(self):
         data = self._processConfig()
-        t_factory.toJSON(data, self.themeName, self.themeColor)
-        self.themeChanged.emit(True)
-        self.setTheme((self.themeName, self.themeColor))
-        self.widget.setTheme((self.themeName, self.themeColor))
+        t_factory.toJSON(data, self._origThemeName, self._origThemeColor)
+        self.themeEdited.emit(True)
+        self.setTheme((self._origThemeName, self._origThemeColor))
+        self.bw.setTheme((self._origThemeName, self._origThemeColor))
+        logger.info(f"Save theme: {self._origThemeName, self._origThemeColor}")
+
+    def closeEvent(self, e):
+        # Force a reload of the previous config to clear any edits.
+        logger.info(
+            f"Aborted: setting theme {self._origThemeName} color: {self._origThemeColor}"
+        )
+        self.tempThemeChanged.emit(self._origThemeName, self._origThemeColor)
+        super().closeEvent(e)
 
 
 if __name__ == "__main__":

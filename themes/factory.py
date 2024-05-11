@@ -95,6 +95,9 @@ def toJSON(data, themeName, themeColor):
     if not themeColor:
         dirPath = "{}{}{}".format(PATH, os.path.sep, themeName)
 
+    if not os.path.isdir(dirPath):
+        os.makedirs(dirPath)
+
     filepath = "{}{}theme.json".format(dirPath, os.path.sep).replace("\\", "/")
     logger.debug("Saving config: %s", filepath)
     with open(filepath, "w") as outfile:

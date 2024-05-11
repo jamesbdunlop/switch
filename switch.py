@@ -216,7 +216,8 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         self.editThemeUI = ThemeEditorDockWidget(
             themeName=self.themeName, themeColor=self.themeColor
         )
-        self.editThemeUI.themeChanged.connect(self._themeEdited)
+        self.editThemeUI.themeEdited.connect(self._themeEdited)
+        self.editThemeUI.tempThemeChanged.connect(self._tmpThemeEdited)
         self.editThemeUI.show()
 
     def _updateRecentFilesMenu(self, path=None):
@@ -342,6 +343,9 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
         else:
             self.dw.show()
         self.themeChanged.connect(self.dw.setTheme)
+
+    def _tmpThemeEdited(self, themeName, themeColor):
+        self.setTheme(themeName, themeColor)
 
     def _themeEdited(self, edit):
         if edit:
