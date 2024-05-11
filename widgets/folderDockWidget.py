@@ -16,10 +16,11 @@ class FolderDockWidget(BaseDockWidget):
     def __init__(self, themeName, themeColor, config=None, parent=None):
         super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowTitle("Create Folders:")
+        self.setObjectName("CreateFoldersObject")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
-        self.widget = BaseWidget(themeName=themeName, themeColor=themeColor)
-        self.mainLayout = QtWidgets.QVBoxLayout(self.widget)
+        self.w = BaseWidget(themeName=themeName, themeColor=themeColor)
+        self.mainLayout = QtWidgets.QVBoxLayout(self.w)
 
         self.bl = QtWidgets.QHBoxLayout()
         self._assetType = None
@@ -38,9 +39,9 @@ class FolderDockWidget(BaseDockWidget):
 
         self.mainLayout.addLayout(self.bl)
         self.mainLayout.addWidget(self.inputName)
-        self.setWidget(self.widget)
-        self.widget.resize(100, 400)
-        self.resize(100, 400)
+        self.setWidget(self.w)
+        # self.w.resize(100, 400)
+        # self.resize(100, 400)
 
         self.mainLayout.addStretch(1)
 

@@ -342,6 +342,7 @@ class Switch(QtWidgets.QMainWindow, IconMixin):
             self.resizeDocks([self.dw], [125], QtCore.Qt.Vertical)
         else:
             self.dw.show()
+        self.themeChanged.connect(self.dw.setTheme)
 
     def _themeEdited(self, edit):
         if edit:
