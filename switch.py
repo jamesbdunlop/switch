@@ -1,4 +1,4 @@
-# 2022: Author James Dunlop: james@anim83d.com
+# 2022: Author James Byrce Dunlop: james@anim83d.com
 
 import sys, os
 import logging
