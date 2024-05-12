@@ -24,6 +24,7 @@ python setup.py build
 ````
 From the commandline inside the switch folder run the above command.<br> 
 This will build into the dist folder and you can run the switch.exe from there.
+You will need to pip install cx_Freeze for this to work.
 
 ____
 

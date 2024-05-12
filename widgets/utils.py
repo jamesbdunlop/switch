@@ -1,5 +1,5 @@
 import logging
-from PySide2 import QtWidgets
+from PySide6 import QtWidgets
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -51,4 +51,4 @@ def errorWidget(title, message):
     widget.setObjectName("ErrorDialog")
     widget.setWindowTitle(title)
     widget.showMessage(message)
-    widget.exec_()
+    widget.exec()

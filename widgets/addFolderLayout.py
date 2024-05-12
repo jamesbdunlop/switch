@@ -1,6 +1,6 @@
 import sys
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from functools import partial
 from widgets.base import BaseWidget as BaseWidget
 
@@ -13,9 +13,7 @@ class AddFolderLayout(BaseWidget):
     name = QtCore.Signal(str, name="name")
 
     def __init__(self, themeName, themeColor, parent=None):
-        super(AddFolderLayout, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName, themeColor, parent=parent)
         self.setWindowTitle("Add Folder Schema")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.wl = QtWidgets.QVBoxLayout(self)
@@ -51,4 +49,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = AddFolderLayout(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

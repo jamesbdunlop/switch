@@ -1,6 +1,6 @@
 import sys
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from widgets.base import BaseWidget as BaseWidget
 from widgets.utils import createLabeledInput
 
@@ -13,9 +13,7 @@ class AddFolderPairToTable(BaseWidget):
     folderPair = QtCore.Signal(list, name="folderPair")
 
     def __init__(self, themeName=None, themeColor=None, parent=None):
-        super(AddFolderPairToTable, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         addFolderLayout = QtWidgets.QVBoxLayout(self)
         layout, self.folderName = createLabeledInput(
@@ -57,4 +55,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = AddFolderPairToTable(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

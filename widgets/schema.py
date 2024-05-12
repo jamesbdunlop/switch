@@ -1,7 +1,7 @@
 import sys
 import logging
 from functools import partial
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from widgets.base import BaseWidget as BaseWidget, ThemeMixin
 from widgets.addFolderPairToTable import AddFolderPairToTable
 from widgets.addFolderLayout import AddFolderLayout
@@ -22,8 +22,8 @@ class RenameableGroupBox(ThemeMixin, QtWidgets.QGroupBox):
             themeColor (string):
             parent (QtWidget):
         """
-        QtWidgets.QGroupBox.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+        super().__init__(parent=parent)
+        self.setTheme((themeName, themeColor))
 
     def mouseDoubleClickEvent(self, e):
         """Pops up a UI to rename the QGroupBox and therefore the folder schema.
@@ -62,9 +62,7 @@ class SchemaWidget(BaseWidget):
             themeColor (string):
             parent QtWidget:
         """
-        BaseWidget.__init__(
-            self, themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self._name = name
 
@@ -234,7 +232,7 @@ class SchemaWidget(BaseWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             widget.setChecked(False)
             return
 
@@ -261,4 +259,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = SchemaWidget(name="test", themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

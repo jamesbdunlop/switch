@@ -1,3 +1,9 @@
+## v0.2.1
+Improvements
+---
+- Theme fixes.
+- PySide2 to vers PySide6.
+
 ## v0.1.8
 Improvements
 ---

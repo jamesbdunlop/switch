@@ -1,7 +1,7 @@
 import logging
 import os, sys
 import json
-from PySide2 import QtCore
+from PySide6 import QtCore
 
 logger = logging.getLogger(__name__)
 logger.propagate = False
@@ -22,22 +22,20 @@ def getPath():
 
 
 # https://www.w3schools.com/colors/colors_monochromatic.asp
-def loadTheme(
-    name,
-    iconPack="core",
-    fontFamily="Madan",
-    fontBaseSize="22px",
-    fontHoverSize="24px",
-    fontTabSize="18px",
-    fontColor="#FFFFFF",
-    fontSelectedColor="#000000",
-    level00="#",
-    level01="#",
-    level02="#",
-    level03="#",
-    level04="#",
-    hiLight="#",
-):
+def loadTheme(name, data):
+    iconPack = data.get("iconPack", "core")
+    fontFamily = data.get("fontFamily", "Madan")
+    fontBaseSize = data.get("fontBaseSize", "22px")
+    fontHoverSize = data.get("fontHoverSize", "24px")
+    fontTabSize = data.get("fontTabSize", "16px")
+    fontColor = data.get("fontColor", "#FFFFFF")
+    fontSelectedColor = data.get("fontSelectedColor", "#000000")
+    level00 = data.get("level00", "#141B24")
+    level01 = data.get("level01", "#23303E")
+    level02 = data.get("level02", "#49627F")
+    level03 = data.get("level03", "#7A95B3")
+    level04 = data.get("level04", "#CDD7E2")
+    hiLight = data.get("hiLight", "#8495A9")
 
     # dirPath = f"{PATH}{os.path.sep}{name}".replace("\\", "/")
     _, PATH = getPath()
@@ -97,6 +95,9 @@ def toJSON(data, themeName, themeColor):
     if not themeColor:
         dirPath = "{}{}{}".format(PATH, os.path.sep, themeName)
 
+    if not os.path.isdir(dirPath):
+        os.makedirs(dirPath)
+
     filepath = "{}{}theme.json".format(dirPath, os.path.sep).replace("\\", "/")
     logger.debug("Saving config: %s", filepath)
     with open(filepath, "w") as outfile:
@@ -112,22 +113,7 @@ def getThemeData(themeName, themeColor):
     """
     data = fromJSON(themeName, themeColor)
 
-    return loadTheme(
-        themeName,
-        data.get("iconPack", "core"),
-        data.get("fontFamily", "Madan"),
-        data.get("fontBaseSize", "22px"),
-        data.get("fontHoverSize", "24px"),
-        data.get("fontTabSize", "16px"),
-        data.get("fontColor", "#FFFFFF"),
-        data.get("fontSelectedColor", "#000000"),
-        data.get("level00", "#141B24"),
-        data.get("level01", "#23303E"),
-        data.get("level02", "#49627F"),
-        data.get("level03", "#7A95B3"),
-        data.get("level04", "#CDD7E2"),
-        data.get("hiLight", "#8495A9"),
-    )
+    return loadTheme(themeName, data)
 
 
 if __name__ == "__main__":

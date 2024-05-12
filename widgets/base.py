@@ -1,6 +1,6 @@
 import os, sys
 import logging
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from themes import factory as st_factory
 
 logger = logging.getLogger(__name__)
@@ -39,11 +39,6 @@ class IconMixin:
 
 
 class ThemeMixin:
-    def __init__(self, themeName, themeColor):
-        self.themeName = themeName
-        self.themeColor = themeColor
-        self.sheet = None
-
     def setTheme(self, theme):
         """
 
@@ -61,17 +56,22 @@ class ThemeMixin:
 
 class BaseWidget(QtWidgets.QWidget, IconMixin, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
-        QtWidgets.QWidget.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+        super().__init__(parent=parent)
+        self.setTheme((themeName, themeColor))
 
 
 class BaseTreeViewWidget(QtWidgets.QTreeView, IconMixin, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
-        QtWidgets.QTreeView.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+        super().__init__(parent=parent)
+        self.setTheme((themeName, themeColor))
 
 
 class BaseDockWidget(QtWidgets.QDockWidget, ThemeMixin):
     def __init__(self, themeName, themeColor, parent=None):
-        QtWidgets.QDockWidget.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+        super().__init__(parent=parent)
+        self.setTheme((themeName, themeColor))
+
+    def setTheme(self, theme):
+        super().setTheme(theme=theme)
+        if not self.widget() is None:
+            self.widget().setStyleSheet(self.sheet)

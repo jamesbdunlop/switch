@@ -1,6 +1,6 @@
 import sys
 import logging
-from PySide2 import QtWidgets, QtCore
+from PySide6 import QtWidgets, QtCore
 from widgets.base import BaseWidget as BaseWidget
 
 logger = logging.getLogger(__name__)
@@ -10,13 +10,10 @@ logging.basicConfig()
 
 class HelpView(BaseWidget):
     def __init__(self, themeName, themeColor, parent=None):
-        BaseWidget.__init__(
-            self, themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
 
         self.setWindowTitle("Help:")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setTheme((themeName, themeColor))
         self._mainLayout = QtWidgets.QVBoxLayout(self)
         htmlStr = (
             "<body>"
@@ -89,4 +86,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = HelpView(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

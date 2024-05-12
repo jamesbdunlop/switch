@@ -1,6 +1,6 @@
 import sys
 import logging
-from PySide2 import QtWidgets, QtCore, QtGui
+from PySide6 import QtWidgets, QtCore, QtGui
 from functools import partial
 from constants import schema as c_schema
 from services import configManger as ss_configManager
@@ -9,7 +9,6 @@ from widgets.base import BaseWidget
 from widgets.base import ThemeMixin
 from widgets.utils import createLabeledInput
 from widgets.utils import errorWidget
-from widgets.schema import SchemaWidget
 from widgets.addFolderLayout import AddFolderLayout
 
 logger = logging.getLogger(__name__)
@@ -18,10 +17,11 @@ logging.basicConfig()
 
 
 class CreateSchemaWidget(BaseWidget):
+    themeChanged = QtCore.Signal(list, name="themeChanged")
+
     def __init__(self, themeName, themeColor, parent=None):
-        super(CreateSchemaWidget, self).__init__(
-            themeName=themeName, themeColor=themeColor, parent=parent
-        )
+        super().__init__(themeName=themeName, themeColor=themeColor, parent=parent)
+
         self.setWindowTitle("Schema Folder Creator")
         self.setObjectName("SchemaFolderCreator")
         self.setTheme([themeName, themeColor])
@@ -31,7 +31,9 @@ class CreateSchemaWidget(BaseWidget):
         self._mainLayout = QtWidgets.QVBoxLayout(self)
 
         # Always add ROOTS and SCHEMA
-        self.schemaTree = SchemaTreeWidget(self.themeName, self.themeColor)
+        self.schemaTree = SchemaTreeWidget()
+        self.schemaTree.setTheme([self.themeName, self.themeColor])
+        self.themeChanged.connect(self.schemaTree.setTheme)
 
         mainPropertiesWidget = QtWidgets.QGroupBox()
         mainPropertiesWidget.setTitle("Project Data:")
@@ -105,10 +107,10 @@ class CreateSchemaWidget(BaseWidget):
     def _createPreview(self):
         data = self._parseTreeData()
         config = ss_configManager.Config(data)
-        self.previewUI = SchemaTreeWidget(
-            themeName="core", themeColor="", asPreview=True, config=config, parent=None
-        )
+        self.previewUI = SchemaTreeWidget(asPreview=True, config=config, parent=None)
+        self.previewUI.setTheme([self.themeName, self.themeColor])
         self.previewUI.setConfigRootName(config.configRoot())
+        self.themeChanged.connect(self.previewUI.setTheme)
         self.previewUI.show()
 
     def _saveSchema(self):
@@ -183,18 +185,18 @@ class CreateSchemaWidget(BaseWidget):
         self.schemaTree.setConfig(config)
         self.schemaTree._refresh()
 
+    def setTheme(self, theme):
+        super().setTheme(theme)
+        self.themeChanged.emit(theme)
+
 
 class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
-    def __init__(
-        self, themeName, themeColor, asPreview=False, config=None, parent=None
-    ):
-        QtWidgets.QTreeWidget.__init__(self, parent=parent)
-        ThemeMixin.__init__(self, themeName=themeName, themeColor=themeColor)
+    def __init__(self, asPreview=False, config=None, parent=None):
+        super().__init__(parent=parent)
+
         self.setWindowTitle("Schema Create....")
         self.setObjectName("SchemaTreeWidget")
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setTheme([themeName, themeColor])
-        self.setStyleSheet(self.sheet)
         self.setColumnCount(1)
         self.setHeaderLabels(["Folder Schema"])
         self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -249,6 +251,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         currentItem = self.currentItem()
         # We leave all rootFolders alone as they have a single dynAsset under them
         rowName = currentItem.text(0)
+        print(rowName)
         if self._isRootFolderItem(currentItem) or rowName == "None":
             removeAction = self._menu.addAction("Remove Subfolder")
             removeAction.triggered.connect(self._removeSubfolder)
@@ -268,14 +271,14 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                 linkToMenu = self._menu.addMenu("LinkTo")
                 validLinkedFolderNames = []
                 # Check the current item is a linkedSubFolderItem
-                if self._isLinkedSubFolderChild(currentItem):
+                islinked = self._isLinkedSubFolderChild(currentItem)
+                if islinked:
                     if currentItem.text(0) in self.config().linkedFolderNames():
                         parentLinkedSubFolderName = currentItem.text(0)
                     else:
                         parentLinkedSubFolderName = self._getLinkedParentName(
                             currentItem
                         )
-
                     for linkedFolderName in self.config().linkedFolderNames():
                         invalid = False
                         if linkedFolderName != parentLinkedSubFolderName:
@@ -393,11 +396,15 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             else:
                 parent = parent.parent()
 
+        return False
+
     def _getLinkedParentName(self, twi):
         parent = twi.parent()
         while parent:
             if parent.text(0) == c_schema.SUBFOLDER_TITLE_NAME:
                 return twi.text(0)
+            else:
+                parent = parent.parent()
         return ""
 
     ## MUTATE TREE
@@ -550,12 +557,13 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     def _addSubfolderPopUp(self):
         """Fire the UI to enter a new folder name"""
         # We don't ever add to a None entry!!
+        print(self.currentItem().text(0))
         if self.currentItem().text(0) == "None":
             return
 
         folderName = AddFolderLayout(self.themeName, self.themeColor)
-        folderName.show()
         folderName.name.connect(self._addSubfolderByName)
+        folderName.show()
 
     def _addLinked(self, folderSchemaName):
         # We don't ever add to a None entry!!
@@ -658,9 +666,12 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         self._parseLinkedFolders(data)
         return data
 
+    def setTheme(self, theme):
+        super().setTheme(theme)
+
 
 if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = CreateSchemaWidget(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())
