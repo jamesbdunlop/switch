@@ -232,7 +232,7 @@ class SchemaWidget(BaseWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             widget.setChecked(False)
             return
 
@@ -259,4 +259,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = SchemaWidget(name="test", themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

@@ -101,7 +101,7 @@ class ThemeEditorDockWidget(BaseDockWidget):
             self.w.windowFlags() | QtCore.Qt.Dialog | QtCore.Qt.WindowStaysOnTopHint
         )
         self.w.setCurrentColor(input.text())
-        self.w.exec_()
+        self.w.exec()
         input.setText(str(self.w.currentColor().name()))
         self._localThemeChange()
 
@@ -149,4 +149,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = ThemeEditorDockWidget(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

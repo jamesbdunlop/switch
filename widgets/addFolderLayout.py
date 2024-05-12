@@ -36,7 +36,7 @@ class AddFolderLayout(BaseWidget):
         self.wl.addLayout(self.buttonLayout)
 
         self.resize(500, 100)
-        # self.setTheme((themeName, themeColor))
+        self.setTheme((themeName, themeColor))
 
     def _commit(self):
         name = str(self.nameInput.text())
@@ -49,4 +49,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = AddFolderLayout(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

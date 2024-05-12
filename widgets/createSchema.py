@@ -9,7 +9,6 @@ from widgets.base import BaseWidget
 from widgets.base import ThemeMixin
 from widgets.utils import createLabeledInput
 from widgets.utils import errorWidget
-from widgets.schema import SchemaWidget
 from widgets.addFolderLayout import AddFolderLayout
 
 logger = logging.getLogger(__name__)
@@ -33,6 +32,7 @@ class CreateSchemaWidget(BaseWidget):
 
         # Always add ROOTS and SCHEMA
         self.schemaTree = SchemaTreeWidget()
+        self.schemaTree.setTheme([self.themeName, self.themeColor])
         self.themeChanged.connect(self.schemaTree.setTheme)
 
         mainPropertiesWidget = QtWidgets.QGroupBox()
@@ -108,8 +108,8 @@ class CreateSchemaWidget(BaseWidget):
         data = self._parseTreeData()
         config = ss_configManager.Config(data)
         self.previewUI = SchemaTreeWidget(asPreview=True, config=config, parent=None)
-        self.previewUI.setConfigRootName(config.configRoot())
         self.previewUI.setTheme([self.themeName, self.themeColor])
+        self.previewUI.setConfigRootName(config.configRoot())
         self.themeChanged.connect(self.previewUI.setTheme)
         self.previewUI.show()
 
@@ -251,6 +251,7 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
         currentItem = self.currentItem()
         # We leave all rootFolders alone as they have a single dynAsset under them
         rowName = currentItem.text(0)
+        print(rowName)
         if self._isRootFolderItem(currentItem) or rowName == "None":
             removeAction = self._menu.addAction("Remove Subfolder")
             removeAction.triggered.connect(self._removeSubfolder)
@@ -270,14 +271,14 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
                 linkToMenu = self._menu.addMenu("LinkTo")
                 validLinkedFolderNames = []
                 # Check the current item is a linkedSubFolderItem
-                if self._isLinkedSubFolderChild(currentItem):
+                islinked = self._isLinkedSubFolderChild(currentItem)
+                if islinked:
                     if currentItem.text(0) in self.config().linkedFolderNames():
                         parentLinkedSubFolderName = currentItem.text(0)
                     else:
                         parentLinkedSubFolderName = self._getLinkedParentName(
                             currentItem
                         )
-
                     for linkedFolderName in self.config().linkedFolderNames():
                         invalid = False
                         if linkedFolderName != parentLinkedSubFolderName:
@@ -395,11 +396,15 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
             else:
                 parent = parent.parent()
 
+        return False
+
     def _getLinkedParentName(self, twi):
         parent = twi.parent()
         while parent:
             if parent.text(0) == c_schema.SUBFOLDER_TITLE_NAME:
                 return twi.text(0)
+            else:
+                parent = parent.parent()
         return ""
 
     ## MUTATE TREE
@@ -552,12 +557,13 @@ class SchemaTreeWidget(QtWidgets.QTreeWidget, ThemeMixin):
     def _addSubfolderPopUp(self):
         """Fire the UI to enter a new folder name"""
         # We don't ever add to a None entry!!
+        print(self.currentItem().text(0))
         if self.currentItem().text(0) == "None":
             return
 
         folderName = AddFolderLayout(self.themeName, self.themeColor)
-        folderName.show()
         folderName.name.connect(self._addSubfolderByName)
+        folderName.show()
 
     def _addLinked(self, folderSchemaName):
         # We don't ever add to a None entry!!
@@ -668,4 +674,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = CreateSchemaWidget(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

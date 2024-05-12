@@ -121,7 +121,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 QtCore.Qt.WindowStaysOnTopHint,
             )
             confirm.setStyleSheet(self.sheet)
-            if confirm.exec_() == QtWidgets.QMessageBox.Ok:
+            if confirm.exec() == QtWidgets.QMessageBox.Ok:
                 rootPath = rootPath.path()
                 self._dir.mkpath(rootPath)
                 for root in self.config.roots():
@@ -309,7 +309,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             return
         rowIndices = self.selectedIndexes()
         for row in rowIndices:
@@ -348,7 +348,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             return
 
         # Check for previously archived to path. Prompt user to use this or not.
@@ -363,7 +363,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 QtCore.Qt.WindowStaysOnTopHint,
             )
             confirm2.setStyleSheet(self.sheet)
-            if confirm2.exec_() == QtWidgets.QMessageBox.Ok:
+            if confirm2.exec() == QtWidgets.QMessageBox.Ok:
                 usePrevious = True
 
         if not usePrevious:
@@ -465,7 +465,7 @@ class SystemFileBrowser(BaseTreeViewWidget):
                 QtCore.Qt.WindowStaysOnTopHint,
             )
             confirm.setStyleSheet(self.sheet)
-            if confirm.exec_() == QtWidgets.QMessageBox.Ok:
+            if confirm.exec() == QtWidgets.QMessageBox.Ok:
                 self._dir.mkpath(self._dir.path())
 
         self._proxyModel.sourceModel().setRootPath(self._dir.path())
@@ -644,7 +644,7 @@ class CustomFileBrowser(BaseTreeViewWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             return
 
         rootDir = QtWidgets.QFileDialog.getExistingDirectory(
@@ -680,7 +680,7 @@ class CustomFileBrowser(BaseTreeViewWidget):
             QtCore.Qt.WindowStaysOnTopHint,
         )
         confirm.setStyleSheet(self.sheet)
-        if confirm.exec_() != QtWidgets.QMessageBox.Ok:
+        if confirm.exec() != QtWidgets.QMessageBox.Ok:
             return
 
         rowIndices = self.selectedIndexes()

@@ -49,4 +49,4 @@ if __name__ == "__main__":
     qtapp = QtWidgets.QApplication(sys.argv)
     win = ConfigBrowser(themeName="core", themeColor="")
     win.show()
-    sys.exit(qtapp.exec_())
+    sys.exit(qtapp.exec())

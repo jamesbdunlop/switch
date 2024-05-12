@@ -51,4 +51,4 @@ def errorWidget(title, message):
     widget.setObjectName("ErrorDialog")
     widget.setWindowTitle(title)
     widget.showMessage(message)
-    widget.exec_()
+    widget.exec()
